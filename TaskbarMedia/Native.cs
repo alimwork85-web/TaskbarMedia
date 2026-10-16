@@ -59,6 +59,11 @@ internal static class Native
     [DllImport("user32.dll")]
     public static extern IntPtr GetParent(IntPtr hwnd);
 
+    public const uint GW_HWNDPREV = 3; // the window above in z-order
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetWindow(IntPtr hwnd, uint cmd);
+
     public const int GWLP_HWNDPARENT = -8; // sets the owner of a top-level window
 
     [DllImport("user32.dll")]

@@ -126,7 +126,7 @@ public partial class TaskbarWidget : Window
                 return;
             }
 
-            if (_hasSession && (Native.IsIconic(_hwnd) || (Native.GetWindowRect(_hwnd, out var now) && now.Left != _targetScreenLeft)))
+            if (_hasSession && (Native.IsIconic(_hwnd) || IsBehindTaskbar() || (Native.GetWindowRect(_hwnd, out var now) && now.Left != _targetScreenLeft)))
                 UpdatePosition();
         };
         _guardTimer.Start();
@@ -278,7 +278,17 @@ public partial class TaskbarWidget : Window
         if (Native.IsIconic(_hwnd))
             Native.ShowWindow(_hwnd, Native.SW_SHOWNOACTIVATE);
 
-        Native.SetWindowPos(_hwnd, Native.HWND_TOP, x, y, width, height, Native.SWP_NOACTIVATE | showFlag);
+        // The taskbar is topmost, and owning the icon does not always keep it above (e.g. after a
+        // reboot it ended up hidden behind the taskbar), so the icon has to be topmost too.
+        Native.SetWindowPos(_hwnd, Native.HWND_TOPMOST, x, y, width, height, Native.SWP_NOACTIVATE | showFlag);
+    }
+
+    /// <summary>True when the taskbar has come in front of the icon (it re-asserts topmost now and then).</summary>
+    private bool IsBehindTaskbar()
+    {
+        for (IntPtr h = Native.GetWindow(_hwnd, Native.GW_HWNDPREV); h != IntPtr.Zero; h = Native.GetWindow(h, Native.GW_HWNDPREV))
+            if (h == _taskbar) return true;
+        return false;
     }
 
     /// <summary>True when an auto-hiding taskbar has slid (almost) off the bottom of its monitor.</summary>
