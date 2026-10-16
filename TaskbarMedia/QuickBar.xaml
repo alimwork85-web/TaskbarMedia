@@ -1,6 +1,7 @@
 <Window x:Class="TaskbarMedia.QuickBar"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:TaskbarMedia"
         Title="TaskbarMedia QuickBar"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ShowInTaskbar="False" ShowActivated="False" Topmost="True"
@@ -29,8 +30,8 @@
             </Grid>
 
             <StackPanel Margin="10,0,10,0" Width="170" VerticalAlignment="Center">
-                <TextBlock x:Name="TitleText" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
-                <TextBlock x:Name="ArtistText" FontSize="12" Opacity="0.7" TextTrimming="CharacterEllipsis"/>
+                <local:MarqueeText x:Name="TitleText" TextElement.FontSize="13" TextElement.FontWeight="SemiBold"/>
+                <local:MarqueeText x:Name="ArtistText" TextElement.FontSize="12" Opacity="0.7"/>
             </StackPanel>
 
             <Button x:Name="PrevButton" Style="{StaticResource IconButton}" Content="&#xE892;" Click="Prev_Click"/>

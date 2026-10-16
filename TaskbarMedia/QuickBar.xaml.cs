@@ -99,6 +99,7 @@ public partial class QuickBar : Window
 
         Popups.PlaceAbove(this, _hwnd, anchor, rtl ? Popups.Align.LeanLeft : Popups.Align.LeanRight, exactX);
         IsShown = true;
+        TitleText.Running = ArtistText.Running = true;
 
         if (Opacity < 1)
             BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(120)));
@@ -111,6 +112,7 @@ public partial class QuickBar : Window
     {
         if (!IsShown) return;
         IsShown = false;
+        TitleText.Running = ArtistText.Running = false;
         BeginAnimation(OpacityProperty, null);
         Opacity = 0;
         Native.ShowWindow(_hwnd, Native.SW_HIDE);

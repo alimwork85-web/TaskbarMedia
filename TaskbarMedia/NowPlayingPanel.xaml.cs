@@ -64,6 +64,7 @@ public partial class NowPlayingPanel : Window
         UpdateLayout();
         Popups.PlaceAbove(this, _hwnd, anchor);
         IsShown = true;
+        TitleText.Running = ArtistText.Running = true;
         Activate();
         BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(150)));
     }
@@ -75,6 +76,7 @@ public partial class NowPlayingPanel : Window
     {
         if (!IsShown) return;
         IsShown = false;
+        TitleText.Running = ArtistText.Running = false;
         BeginAnimation(OpacityProperty, null);
         Opacity = 0;
         Native.ShowWindow(_hwnd, Native.SW_HIDE);
