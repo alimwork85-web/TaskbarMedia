@@ -1,0 +1,44 @@
+<Window x:Class="TaskbarMedia.NowPlayingPanel"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TaskbarMedia Now Playing"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" Topmost="True"
+        ResizeMode="NoResize" SizeToContent="WidthAndHeight"
+        UseLayoutRounding="True">
+
+    <!-- Outer margin leaves room for the shadow. -->
+    <Border x:Name="Root" Margin="12" CornerRadius="10" Padding="20" BorderThickness="1" Width="300">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="3" Opacity="0.4"/>
+        </Border.Effect>
+
+        <StackPanel>
+            <!-- Large cover, with a music-note placeholder underneath -->
+            <Grid Width="240" Height="240" HorizontalAlignment="Center">
+                <Border CornerRadius="8" Background="#33808080">
+                    <TextBlock Text="&#xE8D6;" FontFamily="{StaticResource IconFont}" FontSize="64"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5"/>
+                </Border>
+                <Border CornerRadius="8">
+                    <Border.Background>
+                        <ImageBrush x:Name="CoverBrush" Stretch="UniformToFill"/>
+                    </Border.Background>
+                </Border>
+            </Grid>
+
+            <TextBlock x:Name="TitleText" Margin="0,16,0,0" FontSize="17" FontWeight="SemiBold"
+                       TextAlignment="Center" TextTrimming="CharacterEllipsis"/>
+            <TextBlock x:Name="ArtistText" Margin="0,4,0,0" FontSize="13" Opacity="0.7"
+                       TextAlignment="Center" TextTrimming="CharacterEllipsis"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,16,0,0">
+                <Button x:Name="ShuffleButton" Style="{StaticResource IconButton}" Width="44" Height="44" Content="&#xE8B1;" Click="Shuffle_Click"/>
+                <Button x:Name="PrevButton" Style="{StaticResource IconButton}" Width="44" Height="44" FontSize="17" Content="&#xE892;" Click="Prev_Click"/>
+                <Button x:Name="PlayPauseButton" Style="{StaticResource IconButton}" Width="52" Height="52" FontSize="24" Content="&#xE768;" Click="PlayPause_Click"/>
+                <Button x:Name="NextButton" Style="{StaticResource IconButton}" Width="44" Height="44" FontSize="17" Content="&#xE893;" Click="Next_Click"/>
+                <Button x:Name="RepeatButton" Style="{StaticResource IconButton}" Width="44" Height="44" Content="&#xE8EE;" Click="Repeat_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

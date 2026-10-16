@@ -1,0 +1,11 @@
+# Build output
+bin/
+obj/
+dist/
+
+# Local snapshots made during development (kept on disk, not in git)
+backup_*/
+
+# Editors
+.vs/
+*.user
