@@ -1,8 +1,10 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using Windows.Media;
 
 namespace TaskbarMedia;
@@ -20,6 +22,14 @@ public partial class NowPlayingPanel : Window
     private Color? _paletteSource;
     private IntPtr _hwnd;
 
+    // Seek bar: moves on its own while the panel is open; while dragging it follows the mouse.
+    private readonly DispatcherTimer _seekTimer = new() { Interval = TimeSpan.FromMilliseconds(250) };
+    private TimeSpan _duration;
+    private bool _canSeek;
+    private bool _dragging;
+    private TimeSpan? _seekHeld;      // where we just jumped to, shown until the app reports the new position
+    private DateTime _seekHeldUntil;
+
     public NowPlayingPanel(MediaService media)
     {
         InitializeComponent();
@@ -35,6 +45,8 @@ public partial class NowPlayingPanel : Window
 
         Apply(_media.Current);
 
+        _seekTimer.Tick += (_, _) => UpdateSeekBar();
+
         Deactivated += (_, _) => ClosePanel();
         KeyDown += (_, e) => { if (e.Key == Key.Escape) ClosePanel(); };
     }
@@ -42,6 +54,7 @@ public partial class NowPlayingPanel : Window
     protected override void OnClosed(EventArgs e)
     {
         _media.Updated -= _onUpdated;
+        _seekTimer.Stop();
         base.OnClosed(e);
     }
 
@@ -65,6 +78,8 @@ public partial class NowPlayingPanel : Window
         Popups.PlaceAbove(this, _hwnd, anchor);
         IsShown = true;
         TitleText.Running = ArtistText.Running = true;
+        UpdateSeekBar();
+        _seekTimer.Start();
         Activate();
         BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(150)));
     }
@@ -77,6 +92,8 @@ public partial class NowPlayingPanel : Window
         if (!IsShown) return;
         IsShown = false;
         TitleText.Running = ArtistText.Running = false;
+        _seekTimer.Stop();
+        EndDrag();
         BeginAnimation(OpacityProperty, null);
         Opacity = 0;
         Native.ShowWindow(_hwnd, Native.SW_HIDE);
@@ -111,6 +128,91 @@ public partial class NowPlayingPanel : Window
 
         if (!state.HasSession) ClosePanel();
     }
+
+    private void UpdateSeekBar()
+    {
+        if (_dragging) return;
+
+        var timeline = _media.GetTimeline();
+        if (timeline is not { } t)
+        {
+            // No length to show (no track, or a live stream): keep the bar's space but grey it out.
+            _duration = TimeSpan.Zero;
+            _canSeek = false;
+            SeekArea.Opacity = 0.35;
+            SeekBar.Cursor = null;
+            DrawSeek(TimeSpan.Zero);
+            DurationText.Text = "0:00";
+            return;
+        }
+
+        _duration = t.Duration;
+        _canSeek = t.CanSeek;
+        SeekArea.Opacity = 1;
+        SeekBar.Cursor = t.CanSeek ? Cursors.Hand : null;
+        DurationText.Text = FormatTime(t.Duration);
+
+        var position = t.Position;
+        if (_seekHeld is { } held)
+        {
+            // Apps report the new position a little late; don't let the bar jump back meanwhile.
+            if (DateTime.UtcNow < _seekHeldUntil && (position - held).Duration() > TimeSpan.FromSeconds(2))
+                position = held;
+            else
+                _seekHeld = null;
+        }
+        DrawSeek(position);
+    }
+
+    private void DrawSeek(TimeSpan position)
+    {
+        double fraction = _duration > TimeSpan.Zero ? Math.Clamp(position / _duration, 0, 1) : 0;
+        double width = SeekBar.ActualWidth;
+        SeekFill.Width = width * fraction;
+        SeekThumb.Margin = new Thickness(Math.Clamp(width * fraction - SeekThumb.Width / 2, 0, Math.Max(0, width - SeekThumb.Width)), 0, 0, 0);
+        ElapsedText.Text = FormatTime(position);
+    }
+
+    private TimeSpan PositionAt(MouseEventArgs e)
+    {
+        double width = SeekBar.ActualWidth;
+        double fraction = width > 0 ? Math.Clamp(e.GetPosition(SeekBar).X / width, 0, 1) : 0;
+        return _duration * fraction;
+    }
+
+    private void Seek_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (!_canSeek || _duration <= TimeSpan.Zero) return;
+        _dragging = true;
+        SeekBar.CaptureMouse();
+        DrawSeek(PositionAt(e));
+        e.Handled = true;
+    }
+
+    private void Seek_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (_dragging) DrawSeek(PositionAt(e));
+    }
+
+    private async void Seek_MouseUp(object sender, MouseButtonEventArgs e)
+    {
+        if (!_dragging) return;
+        var target = PositionAt(e);
+        EndDrag();
+        DrawSeek(target);
+        _seekHeld = target;
+        _seekHeldUntil = DateTime.UtcNow.AddSeconds(2);
+        await _media.SeekAsync(target);
+    }
+
+    private void EndDrag()
+    {
+        _dragging = false;
+        if (SeekBar.IsMouseCaptured) SeekBar.ReleaseMouseCapture();
+    }
+
+    private static string FormatTime(TimeSpan t) =>
+        t.ToString(t.TotalHours >= 1 ? @"h\:mm\:ss" : @"m\:ss", CultureInfo.InvariantCulture);
 
     private async void Prev_Click(object sender, RoutedEventArgs e) => await _media.PreviousAsync();
     private async void PlayPause_Click(object sender, RoutedEventArgs e) => await _media.TogglePlayPauseAsync();

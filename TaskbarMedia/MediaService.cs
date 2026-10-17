@@ -197,6 +197,39 @@ public sealed class MediaService
             _ => MediaPlaybackAutoRepeatMode.None,
         }));
 
+    /// <summary>
+    /// Where the current track is (estimated forward from the app's last report while playing) and how long it is.
+    /// Null when there is no track or the app gives no length (e.g. a live stream).
+    /// </summary>
+    public (TimeSpan Position, TimeSpan Duration, bool CanSeek)? GetTimeline()
+    {
+        var session = _session;
+        if (session == null) return null;
+        try
+        {
+            var t = session.GetTimelineProperties();
+            var info = session.GetPlaybackInfo();
+            var duration = t.EndTime - t.StartTime;
+            if (duration <= TimeSpan.Zero) return null;
+
+            var position = t.Position - t.StartTime;
+            if (info.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing && t.LastUpdatedTime.Year > 2000)
+                position += (DateTimeOffset.Now - t.LastUpdatedTime) * (info.PlaybackRate ?? 1);
+
+            if (position < TimeSpan.Zero) position = TimeSpan.Zero;
+            if (position > duration) position = duration;
+            return (position, duration, info.Controls.IsPlaybackPositionEnabled);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>Jumps to <paramref name="position"/> from the start of the track.</summary>
+    public Task SeekAsync(TimeSpan position) => SendAsync(s =>
+        s.TryChangePlaybackPositionAsync((s.GetTimelineProperties().StartTime + position).Ticks));
+
     private async Task SendAsync(Func<Session, IAsyncOperation<bool>> command)
     {
         var session = _session;

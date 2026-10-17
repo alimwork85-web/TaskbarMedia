@@ -33,7 +33,24 @@
             <local:MarqueeText x:Name="ArtistText" Margin="0,4,0,0" CenterWhenFits="True"
                                TextElement.FontSize="13" Opacity="0.7"/>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,16,0,0">
+            <!-- Seek bar: click or drag to jump anywhere in the track -->
+            <StackPanel x:Name="SeekArea" Width="240" Margin="0,12,0,0" FlowDirection="LeftToRight">
+                <Grid x:Name="SeekBar" Height="16" Background="Transparent" Cursor="Hand"
+                      MouseLeftButtonDown="Seek_MouseDown" MouseMove="Seek_MouseMove" MouseLeftButtonUp="Seek_MouseUp">
+                    <Border Height="4" CornerRadius="2" VerticalAlignment="Center" Opacity="0.25"
+                            Background="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    <Border x:Name="SeekFill" Height="4" Width="0" CornerRadius="2" HorizontalAlignment="Left" VerticalAlignment="Center"
+                            Background="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    <Ellipse x:Name="SeekThumb" Width="12" Height="12" HorizontalAlignment="Left" VerticalAlignment="Center"
+                             Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                </Grid>
+                <Grid Opacity="0.7" Margin="0,2,0,0">
+                    <TextBlock x:Name="ElapsedText" FontSize="11" Text="0:00" HorizontalAlignment="Left"/>
+                    <TextBlock x:Name="DurationText" FontSize="11" Text="0:00" HorizontalAlignment="Right"/>
+                </Grid>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
                 <Button x:Name="ShuffleButton" Style="{StaticResource IconButton}" Width="44" Height="44" Content="&#xE8B1;" Click="Shuffle_Click"/>
                 <Button x:Name="PrevButton" Style="{StaticResource IconButton}" Width="44" Height="44" FontSize="17" Content="&#xE892;" Click="Prev_Click"/>
                 <Button x:Name="PlayPauseButton" Style="{StaticResource IconButton}" Width="52" Height="52" FontSize="24" Content="&#xE768;" Click="PlayPause_Click"/>
