@@ -137,7 +137,7 @@ public partial class TaskbarWidget : Window
             if (fullscreen != _fullscreenHidden)
             {
                 _fullscreenHidden = fullscreen;
-                if (fullscreen) _quickBar.HideBar();
+                if (fullscreen) { _quickBar.HideBar(); _panel.ClosePanel(); }
                 UpdatePosition();
                 return;
             }
