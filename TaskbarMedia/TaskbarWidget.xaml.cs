@@ -31,6 +31,7 @@ public partial class TaskbarWidget : Window
     private (int X, int Y, int Width, int Height)? _target;
     private int _targetScreenLeft;
     private bool _taskbarHidden;
+    private bool _fullscreenHidden;      // a full-screen window covers the monitor (Settings.HideOnFullscreen)
 
     // Checks often whether the icon drifted or an auto-hiding taskbar slid in/out, and follows right away.
     private readonly DispatcherTimer _guardTimer = new() { Interval = TimeSpan.FromMilliseconds(250) };
@@ -125,6 +126,16 @@ public partial class TaskbarWidget : Window
         _guardTimer.Tick += (_, _) =>
         {
             if (_target == null) return;
+
+            // Hide while a full-screen window (video, game) covers our monitor; also closes the quick bar.
+            bool fullscreen = Settings.HideOnFullscreen && IsForegroundFullscreen();
+            if (fullscreen != _fullscreenHidden)
+            {
+                _fullscreenHidden = fullscreen;
+                if (fullscreen) _quickBar.HideBar();
+                UpdatePosition();
+                return;
+            }
 
             // Follow an auto-hiding taskbar in and out quickly.
             if (Settings.Position == "Auto" && Native.GetWindowRect(_taskbar, out var bar) && IsTaskbarTuckedAway(bar) != _taskbarHidden)
@@ -292,7 +303,7 @@ public partial class TaskbarWidget : Window
         }
         _target = (x, y, width, height);
         _targetScreenLeft = x;
-        uint showFlag = _hasSession && !_taskbarHidden ? Native.SWP_SHOWWINDOW : Native.SWP_HIDEWINDOW;
+        uint showFlag = _hasSession && !_taskbarHidden && !_fullscreenHidden ? Native.SWP_SHOWWINDOW : Native.SWP_HIDEWINDOW;
 
         // If something minimized the icon (e.g. a tool that hides windows), restore it first.
         if (Native.IsIconic(_hwnd))
@@ -301,6 +312,22 @@ public partial class TaskbarWidget : Window
         // The taskbar is topmost, and owning the icon does not always keep it above (e.g. after a
         // reboot it ended up hidden behind the taskbar), so the icon has to be topmost too.
         Native.SetWindowPos(_hwnd, Native.HWND_TOPMOST, x, y, width, height, Native.SWP_NOACTIVATE | showFlag);
+    }
+
+    /// <summary>True when the foreground window (not the desktop or shell) exactly covers the monitor the icon is on.</summary>
+    private bool IsForegroundFullscreen()
+    {
+        IntPtr fg = Native.GetForegroundWindow();
+        if (fg == IntPtr.Zero || fg == _hwnd || fg == _taskbar || !Native.GetWindowRect(fg, out var r)) return false;
+
+        var name = new System.Text.StringBuilder(64);
+        Native.GetClassName(fg, name, name.Capacity);
+        if (name.ToString() is "Progman" or "WorkerW" or "Shell_TrayWnd" or "Shell_SecondaryTrayWnd") return false;
+
+        var info = new Native.MONITORINFO { cbSize = Marshal.SizeOf<Native.MONITORINFO>() };
+        if (!Native.GetMonitorInfo(Native.MonitorFromWindow(_hwnd, Native.MONITOR_DEFAULTTONEAREST), ref info)) return false;
+        var m = info.rcMonitor;
+        return r.Left <= m.Left && r.Top <= m.Top && r.Right >= m.Right && r.Bottom >= m.Bottom;
     }
 
     /// <summary>True when the taskbar has come in front of the icon (it re-asserts topmost now and then).</summary>
