@@ -16,6 +16,8 @@ internal static class Settings
     public static string AccentMode { get; set; } = "Album";
     /// <summary>"Auto" (follow the tray) | "TopLeft" | "TopCenter" | "TopRight" | "BottomLeft" | "BottomRight".</summary>
     public static string Position { get; set; } = "Auto";
+    /// <summary>Large panel shape: "Normal" or "Capsule" (fully rounded ends).</summary>
+    public static string PanelShape { get; set; } = "Normal";
 
     private sealed class Data
     {
@@ -24,6 +26,7 @@ internal static class Settings
         public bool HotkeyEnabled { get; set; } = true;
         public string AccentMode { get; set; } = "Album";
         public string Position { get; set; } = "Auto";
+        public string PanelShape { get; set; } = "Normal";
     }
 
     public static void Load()
@@ -37,6 +40,7 @@ internal static class Settings
             AutoShowOnTrackChange = d.AutoShowOnTrackChange;
             HotkeyEnabled = d.HotkeyEnabled;
             AccentMode = d.AccentMode == "Windows" ? "Windows" : "Album";
+            PanelShape = d.PanelShape == "Capsule" ? "Capsule" : "Normal";
             Position = d.Position is "TopLeft" or "TopCenter" or "TopRight" or "BottomLeft" or "BottomRight" ? d.Position : "Auto";
         }
         catch (Exception)
@@ -57,6 +61,7 @@ internal static class Settings
                 HotkeyEnabled = HotkeyEnabled,
                 AccentMode = AccentMode,
                 Position = Position,
+                PanelShape = PanelShape,
             };
             string tmp = FilePath + ".tmp";
             File.WriteAllText(tmp, JsonSerializer.Serialize(d, new JsonSerializerOptions { WriteIndented = true }));

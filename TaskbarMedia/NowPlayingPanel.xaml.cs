@@ -74,7 +74,7 @@ public partial class NowPlayingPanel : Window
         // WPF's Show() only the first time; afterwards hide/show through Win32 (see QuickBar).
         Opacity = 0;
         if (!IsVisible) Show();
-        UpdateLayout();
+        ApplyShape();
         Popups.PlaceAbove(this, _hwnd, anchor);
         IsShown = true;
         TitleText.Running = ArtistText.Running = true;
@@ -82,6 +82,17 @@ public partial class NowPlayingPanel : Window
         _seekTimer.Start();
         Activate();
         BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(150)));
+    }
+
+    /// <summary>Normal: 10px corners. Capsule: fully rounded ends, with wider side padding so the cover and controls stay clear of the curve.</summary>
+    private void ApplyShape()
+    {
+        bool capsule = Settings.PanelShape == "Capsule";
+        double side = capsule ? 45 : 20;
+        Root.Padding = new Thickness(side, 20, side, 20);
+        Root.Width = double.NaN; // size to content, so the seek times and buttons are never cut off
+        UpdateLayout();
+        Root.CornerRadius = new CornerRadius(capsule ? Root.ActualHeight / 2 : 10);
     }
 
     /// <summary>Whether the panel is currently on screen (WPF's IsVisible stays true once shown).</summary>

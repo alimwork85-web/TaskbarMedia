@@ -63,6 +63,8 @@ public partial class TaskbarWidget : Window
         HideFullscreenItem.IsChecked = Settings.HideOnFullscreen;
         AutoShowItem.IsChecked = Settings.AutoShowOnTrackChange;
         HotkeyItem.IsChecked = Settings.HotkeyEnabled;
+        ShapeNormalItem.IsChecked = Settings.PanelShape == "Normal";
+        ShapeCapsuleItem.IsChecked = Settings.PanelShape == "Capsule";
         AccentAlbumItem.IsChecked = Settings.AccentMode == "Album";
         AccentWindowsItem.IsChecked = Settings.AccentMode == "Windows";
         foreach (System.Windows.Controls.MenuItem item in PositionMenu.Items) item.IsChecked = (string)item.Tag == Settings.Position;
@@ -574,6 +576,17 @@ public partial class TaskbarWidget : Window
         foreach (System.Windows.Controls.MenuItem item in PositionMenu.Items) item.IsChecked = (string)item.Tag == Settings.Position;
         Settings.Save();
         UpdatePosition();
+    }
+
+    private void ShapeNormal_Click(object sender, RoutedEventArgs e) => SetShape("Normal");
+    private void ShapeCapsule_Click(object sender, RoutedEventArgs e) => SetShape("Capsule");
+
+    private void SetShape(string shape)
+    {
+        Settings.PanelShape = shape;
+        ShapeNormalItem.IsChecked = shape == "Normal";
+        ShapeCapsuleItem.IsChecked = shape == "Capsule";
+        Settings.Save();
     }
 
     private void SetAccent(string mode)
