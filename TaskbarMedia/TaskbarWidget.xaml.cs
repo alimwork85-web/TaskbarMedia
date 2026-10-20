@@ -33,6 +33,9 @@ public partial class TaskbarWidget : Window
     private bool _taskbarHidden;
     private string? _lastTrack;          // title + artist of the previous track; null until the first one is seen
     private readonly DispatcherTimer _autoCloseTimer = new() { Interval = TimeSpan.FromSeconds(4) };
+    private bool _manualHidden;          // toggled by Ctrl+Alt+M
+    private bool _hotkeyRegistered;
+    private const int HotkeyId = 0x544D;
     private bool _fullscreenHidden;      // a full-screen window covers the monitor (Settings.HideOnFullscreen)
 
     // Checks often whether the icon drifted or an auto-hiding taskbar slid in/out, and follows right away.
@@ -205,6 +208,7 @@ public partial class TaskbarWidget : Window
         _hideTimer.Stop();
         _fadeTimer.Stop();
         _autoCloseTimer.Stop();
+        if (_hotkeyRegistered) { Native.UnregisterHotKey(_hwnd, HotkeyId); _hotkeyRegistered = false; }
         _quickBar.Close();
         _panel.Close();
     }
@@ -236,6 +240,7 @@ public partial class TaskbarWidget : Window
         SizeToContent = SizeToContent.Manual;
         SizeToContent = SizeToContent.WidthAndHeight;
 
+        ApplyHotkey();
         EmbedInTaskbar();
     }
 
@@ -313,7 +318,7 @@ public partial class TaskbarWidget : Window
         }
         _target = (x, y, width, height);
         _targetScreenLeft = x;
-        uint showFlag = _hasSession && !_taskbarHidden && !_fullscreenHidden ? Native.SWP_SHOWWINDOW : Native.SWP_HIDEWINDOW;
+        uint showFlag = _hasSession && !_taskbarHidden && !_fullscreenHidden && !_manualHidden ? Native.SWP_SHOWWINDOW : Native.SWP_HIDEWINDOW;
 
         // If something minimized the icon (e.g. a tool that hides windows), restore it first.
         if (Native.IsIconic(_hwnd))
@@ -434,6 +439,13 @@ public partial class TaskbarWidget : Window
     {
         switch (msg)
         {
+            case Native.WM_HOTKEY when wParam.ToInt32() == HotkeyId:
+                _manualHidden = !_manualHidden;
+                if (_manualHidden) { _quickBar.HideBar(); _panel.ClosePanel(); }
+                UpdatePosition();
+                handled = true;
+                return IntPtr.Zero;
+
             // Swallowed (as FluentFlyout does) so shell mods that enumerate taskbar
             // child windows can't freeze on our window.
             case Native.WM_WINDOWPOSCHANGING:
@@ -506,7 +518,7 @@ public partial class TaskbarWidget : Window
 
     private void AutoShowQuickBar()
     {
-        if (!Settings.AutoShowOnTrackChange || _panel.IsShown || _fullscreenHidden) return;
+        if (!Settings.AutoShowOnTrackChange || _panel.IsShown || _fullscreenHidden || _manualHidden) return;
         if (!Native.GetWindowRect(_hwnd, out var icon)) return;
         _quickBar.ShowAbove(icon, IsRtl(), Settings.Position == "Auto" ? _floatingFrame : null);
         _autoCloseTimer.Stop();
@@ -523,7 +535,27 @@ public partial class TaskbarWidget : Window
 
     private void HideFullscreen_Click(object sender, RoutedEventArgs e) { Settings.HideOnFullscreen = HideFullscreenItem.IsChecked; Settings.Save(); }
     private void AutoShow_Click(object sender, RoutedEventArgs e) { Settings.AutoShowOnTrackChange = AutoShowItem.IsChecked; Settings.Save(); }
-    private void Hotkey_Click(object sender, RoutedEventArgs e) { Settings.HotkeyEnabled = HotkeyItem.IsChecked; Settings.Save(); }
+    private void Hotkey_Click(object sender, RoutedEventArgs e) { Settings.HotkeyEnabled = HotkeyItem.IsChecked; Settings.Save(); ApplyHotkey(); }
+
+    /// <summary>Registers or releases the global Ctrl+Alt+M shortcut to match Settings.HotkeyEnabled.</summary>
+    private void ApplyHotkey()
+    {
+        if (_hwnd == IntPtr.Zero) return;
+        if (_hotkeyRegistered && !Settings.HotkeyEnabled)
+        {
+            Native.UnregisterHotKey(_hwnd, HotkeyId);
+            _hotkeyRegistered = false;
+            _manualHidden = false; // without the shortcut there would be no way to bring the icon back
+            UpdatePosition();
+        }
+        else if (!_hotkeyRegistered && Settings.HotkeyEnabled)
+        {
+            _hotkeyRegistered = Native.RegisterHotKey(_hwnd, HotkeyId, Native.MOD_CONTROL | Native.MOD_ALT | Native.MOD_NOREPEAT, Native.VK_M);
+            if (!_hotkeyRegistered)
+                System.Diagnostics.Debug.WriteLine($"Ctrl+Alt+M not registered (already taken?): error {Marshal.GetLastWin32Error()}");
+        }
+    }
+
     private void AccentAlbum_Click(object sender, RoutedEventArgs e) => SetAccent("Album");
     private void AccentWindows_Click(object sender, RoutedEventArgs e) => SetAccent("Windows");
 
