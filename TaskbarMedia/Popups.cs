@@ -40,9 +40,17 @@ internal static class Popups
             Align.LeanRight => (centered + anchor.Left) / 2,
             _ => centered,
         };
-        x = Math.Clamp(x, work.Left, Math.Max(work.Left, work.Right - width));
-        // With the taskbar at the top the popup hangs below it instead of resting on a bottom taskbar.
-        int y = IsTaskbarAtTop() ? work.Top : work.Bottom - height;
+        bool manual = Settings.Position != "Auto";
+        var area = manual ? info.rcMonitor : work;
+        x = Math.Clamp(x, area.Left, Math.Max(area.Left, area.Right - width));
+        // Manual corners open inward from the icon; otherwise it hangs below a top taskbar or rests on a bottom one.
+        int y;
+        if (manual)
+            y = Settings.Position.StartsWith("Top")
+                ? Math.Min(anchor.Bottom, Math.Max(area.Top, area.Bottom - height))
+                : Math.Max(area.Top, anchor.Top - height);
+        else
+            y = IsTaskbarAtTop() ? work.Top : work.Bottom - height;
 
         // If something minimized the popup (e.g. Win+D, or tools that hide windows), it would
         // reappear as a tiny clipped minimized-size window; restore it first.

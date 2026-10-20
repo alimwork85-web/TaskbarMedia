@@ -59,6 +59,7 @@ public partial class TaskbarWidget : Window
         HotkeyItem.IsChecked = Settings.HotkeyEnabled;
         AccentAlbumItem.IsChecked = Settings.AccentMode == "Album";
         AccentWindowsItem.IsChecked = Settings.AccentMode == "Windows";
+        foreach (System.Windows.Controls.MenuItem item in PositionMenu.Items) item.IsChecked = (string)item.Tag == Settings.Position;
         _media = media;
         _onUpdated = state => Dispatcher.InvokeAsync(() => Apply(state));
         _media.Updated += _onUpdated;
@@ -87,7 +88,7 @@ public partial class TaskbarWidget : Window
         {
             _showTimer.Stop();
             if (_hasSession && !_panel.IsShown && Native.GetWindowRect(_hwnd, out var icon))
-                _quickBar.ShowAbove(icon, IsRtl(), _floatingFrame);
+                _quickBar.ShowAbove(icon, IsRtl(), Settings.Position == "Auto" ? _floatingFrame : null);
         };
 
         // Clicking the cover in the quick bar swaps it for the large panel.
@@ -126,7 +127,7 @@ public partial class TaskbarWidget : Window
             if (_target == null) return;
 
             // Follow an auto-hiding taskbar in and out quickly.
-            if (Native.GetWindowRect(_taskbar, out var bar) && IsTaskbarTuckedAway(bar) != _taskbarHidden)
+            if (Settings.Position == "Auto" && Native.GetWindowRect(_taskbar, out var bar) && IsTaskbarTuckedAway(bar) != _taskbarHidden)
             {
                 UpdatePosition();
                 return;
@@ -276,6 +277,19 @@ public partial class TaskbarWidget : Window
         int y = bar.Top + (barHeight - height) / 2;
 
         _taskbarHidden = IsTaskbarTuckedAway(bar);
+        if (Settings.Position != "Auto")
+        {
+            // Manual corner of the primary monitor, 8 dip from the edges.
+            var origin = new Native.RECT { Left = 0, Top = 0, Right = 1, Bottom = 1 };
+            var mon = new Native.MONITORINFO { cbSize = Marshal.SizeOf<Native.MONITORINFO>() };
+            if (Native.GetMonitorInfo(Native.MonitorFromRect(ref origin, Native.MONITOR_DEFAULTTONEAREST), ref mon))
+            {
+                int margin = (int)Math.Round(8 * scale);
+                x = Settings.Position.EndsWith("Left") ? mon.rcMonitor.Left + margin : mon.rcMonitor.Right - margin - width;
+                y = Settings.Position.StartsWith("Top") ? mon.rcMonitor.Top + margin : mon.rcMonitor.Bottom - margin - height;
+                _taskbarHidden = false;
+            }
+        }
         _target = (x, y, width, height);
         _targetScreenLeft = x;
         uint showFlag = _hasSession && !_taskbarHidden ? Native.SWP_SHOWWINDOW : Native.SWP_HIDEWINDOW;
@@ -457,6 +471,14 @@ public partial class TaskbarWidget : Window
     private void Hotkey_Click(object sender, RoutedEventArgs e) { Settings.HotkeyEnabled = HotkeyItem.IsChecked; Settings.Save(); }
     private void AccentAlbum_Click(object sender, RoutedEventArgs e) => SetAccent("Album");
     private void AccentWindows_Click(object sender, RoutedEventArgs e) => SetAccent("Windows");
+
+    private void Position_Click(object sender, RoutedEventArgs e)
+    {
+        Settings.Position = (string)((System.Windows.Controls.MenuItem)sender).Tag;
+        foreach (System.Windows.Controls.MenuItem item in PositionMenu.Items) item.IsChecked = (string)item.Tag == Settings.Position;
+        Settings.Save();
+        UpdatePosition();
+    }
 
     private void SetAccent(string mode)
     {
