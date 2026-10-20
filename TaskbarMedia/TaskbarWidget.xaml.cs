@@ -181,6 +181,11 @@ public partial class TaskbarWidget : Window
         if (!Native.GetCursorPos(out var p)) return false;
         if (!Native.GetWindowRect(_taskbar, out var bar) || !Native.GetWindowRect(_hwnd, out var icon)) return false;
 
+        // Manual corners: only the icon itself counts (the taskbar is somewhere else).
+        if (Settings.Position != "Auto")
+            return p.X >= icon.Left - NearMargin && p.X <= icon.Right + NearMargin
+                && p.Y >= icon.Top - NearMargin && p.Y <= icon.Bottom + NearMargin;
+
         int left = icon.Left, right = icon.Right;
         if (_trayExtent is { } tray)
         {
@@ -361,7 +366,7 @@ public partial class TaskbarWidget : Window
         var info = new Native.MONITORINFO { cbSize = Marshal.SizeOf<Native.MONITORINFO>() };
         if (!Native.GetMonitorInfo(Native.MonitorFromRect(ref bar, Native.MONITOR_DEFAULTTONEAREST), ref info))
             return false;
-        return bar.Top >= info.rcMonitor.Bottom - 8;
+        return bar.Top >= info.rcMonitor.Bottom - 8 || bar.Bottom <= info.rcMonitor.Top + 8;
     }
 
     /// <summary>
