@@ -44,6 +44,24 @@ internal static class Native
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT { public int Left, Top, Right, Bottom; }
 
+    public const uint ABM_GETTASKBARPOS = 5;
+    public const uint ABE_TOP = 1;
+    public const uint ABE_BOTTOM = 3;
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct APPBARDATA
+    {
+        public int cbSize;
+        public IntPtr hWnd;
+        public uint uCallbackMessage;
+        public uint uEdge;
+        public RECT rc;
+        public IntPtr lParam;
+    }
+
+    [DllImport("shell32.dll")]
+    public static extern UIntPtr SHAppBarMessage(uint message, ref APPBARDATA data);
+
     [StructLayout(LayoutKind.Sequential)]
     public struct POINT { public int X, Y; }
 

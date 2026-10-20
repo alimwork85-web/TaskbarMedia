@@ -11,6 +11,12 @@ internal static class Popups
     /// </summary>
     public enum Align { Center, LeanLeft, LeanRight }
 
+    private static bool IsTaskbarAtTop()
+    {
+        var data = new Native.APPBARDATA { cbSize = Marshal.SizeOf<Native.APPBARDATA>() };
+        return Native.SHAppBarMessage(Native.ABM_GETTASKBARPOS, ref data) != UIntPtr.Zero && data.uEdge == Native.ABE_TOP;
+    }
+
     /// <summary>
     /// Moves an already-shown window so it sits above <paramref name="anchor"/> (screen px),
     /// resting on the taskbar and kept inside the monitor's work area.
@@ -35,7 +41,8 @@ internal static class Popups
             _ => centered,
         };
         x = Math.Clamp(x, work.Left, Math.Max(work.Left, work.Right - width));
-        int y = work.Bottom - height;
+        // With the taskbar at the top the popup hangs below it instead of resting on a bottom taskbar.
+        int y = IsTaskbarAtTop() ? work.Top : work.Bottom - height;
 
         // If something minimized the popup (e.g. Win+D, or tools that hide windows), it would
         // reappear as a tiny clipped minimized-size window; restore it first.
