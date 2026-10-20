@@ -104,7 +104,7 @@ public partial class NowPlayingPanel : Window
     /// <summary>Re-tints with the current accent mode (called when the setting changes).</summary>
     internal void RefreshAccent()
     {
-        if (_lastState != null) Apply(_lastState);
+        if (_lastState != null && Theme.PopupSource(_lastState.CoverColor) != _paletteSource) Apply(_lastState);
     }
 
     private void Apply(MediaState state)

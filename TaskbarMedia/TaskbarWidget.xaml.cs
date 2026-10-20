@@ -125,6 +125,8 @@ public partial class TaskbarWidget : Window
             }
             UpdatePosition();
             RefreshTrayExtent();
+            _quickBar.RefreshAccent(); // picks up a changed Windows accent color
+            _panel.RefreshAccent();
         };
         _trayTimer.Start();
 
