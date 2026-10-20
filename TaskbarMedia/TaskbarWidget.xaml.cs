@@ -31,6 +31,8 @@ public partial class TaskbarWidget : Window
     private (int X, int Y, int Width, int Height)? _target;
     private int _targetScreenLeft;
     private bool _taskbarHidden;
+    private string? _lastTrack;          // title + artist of the previous track; null until the first one is seen
+    private readonly DispatcherTimer _autoCloseTimer = new() { Interval = TimeSpan.FromSeconds(4) };
     private bool _fullscreenHidden;      // a full-screen window covers the monitor (Settings.HideOnFullscreen)
 
     // Checks often whether the icon drifted or an auto-hiding taskbar slid in/out, and follows right away.
@@ -149,6 +151,13 @@ public partial class TaskbarWidget : Window
         };
         _guardTimer.Start();
 
+        _autoCloseTimer.Tick += (_, _) =>
+        {
+            _autoCloseTimer.Stop();
+            // While the pointer is on the bar or the icon, the usual leave-to-hide handling takes over.
+            if (!_quickBar.IsMouseOver && !Root.IsMouseOver) _quickBar.HideBar();
+        };
+
         Opacity = 0;
         _fadeTimer.Tick += (_, _) => UpdateFade();
         _fadeTimer.Start();
@@ -195,6 +204,7 @@ public partial class TaskbarWidget : Window
         _showTimer.Stop();
         _hideTimer.Stop();
         _fadeTimer.Stop();
+        _autoCloseTimer.Stop();
         _quickBar.Close();
         _panel.Close();
     }
@@ -483,6 +493,24 @@ public partial class TaskbarWidget : Window
             _hasSession = state.HasSession;
             UpdatePosition();
         }
+
+        // Peek at the quick bar when the track really changes (not the first one seen at startup).
+        if (state.HasSession && (state.Title.Length > 0 || state.Artist.Length > 0))
+        {
+            string track = state.Title + "|" + state.Artist;
+            bool changed = _lastTrack != null && track != _lastTrack;
+            _lastTrack = track;
+            if (changed) AutoShowQuickBar();
+        }
+    }
+
+    private void AutoShowQuickBar()
+    {
+        if (!Settings.AutoShowOnTrackChange || _panel.IsShown || _fullscreenHidden) return;
+        if (!Native.GetWindowRect(_hwnd, out var icon)) return;
+        _quickBar.ShowAbove(icon, IsRtl(), Settings.Position == "Auto" ? _floatingFrame : null);
+        _autoCloseTimer.Stop();
+        _autoCloseTimer.Start();
     }
 
     private void ApplyTheme()
