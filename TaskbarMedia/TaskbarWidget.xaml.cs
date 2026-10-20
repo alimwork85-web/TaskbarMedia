@@ -53,6 +53,12 @@ public partial class TaskbarWidget : Window
     public TaskbarWidget(MediaService media)
     {
         InitializeComponent();
+        Settings.Load();
+        HideFullscreenItem.IsChecked = Settings.HideOnFullscreen;
+        AutoShowItem.IsChecked = Settings.AutoShowOnTrackChange;
+        HotkeyItem.IsChecked = Settings.HotkeyEnabled;
+        AccentAlbumItem.IsChecked = Settings.AccentMode == "Album";
+        AccentWindowsItem.IsChecked = Settings.AccentMode == "Windows";
         _media = media;
         _onUpdated = state => Dispatcher.InvokeAsync(() => Apply(state));
         _media.Updated += _onUpdated;
@@ -444,6 +450,20 @@ public partial class TaskbarWidget : Window
 
         Foreground = light ? Brushes.Black : Brushes.White;
         _hoverBrush = new SolidColorBrush(light ? Color.FromArgb(0x18, 0, 0, 0) : Color.FromArgb(0x18, 0xFF, 0xFF, 0xFF));
+    }
+
+    private void HideFullscreen_Click(object sender, RoutedEventArgs e) { Settings.HideOnFullscreen = HideFullscreenItem.IsChecked; Settings.Save(); }
+    private void AutoShow_Click(object sender, RoutedEventArgs e) { Settings.AutoShowOnTrackChange = AutoShowItem.IsChecked; Settings.Save(); }
+    private void Hotkey_Click(object sender, RoutedEventArgs e) { Settings.HotkeyEnabled = HotkeyItem.IsChecked; Settings.Save(); }
+    private void AccentAlbum_Click(object sender, RoutedEventArgs e) => SetAccent("Album");
+    private void AccentWindows_Click(object sender, RoutedEventArgs e) => SetAccent("Windows");
+
+    private void SetAccent(string mode)
+    {
+        Settings.AccentMode = mode;
+        AccentAlbumItem.IsChecked = mode == "Album";
+        AccentWindowsItem.IsChecked = mode == "Windows";
+        Settings.Save();
     }
 
     private void Exit_Click(object sender, RoutedEventArgs e) => ((App)Application.Current).Quit();

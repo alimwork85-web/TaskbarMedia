@@ -15,6 +15,13 @@
     <Border x:Name="Root" Width="40" Height="40" CornerRadius="4" Background="Transparent">
         <Border.ContextMenu>
             <ContextMenu>
+                <MenuItem x:Name="HideFullscreenItem" Header="إخفاء في وضع ملء الشاشة" IsCheckable="True" Click="HideFullscreen_Click"/>
+                <MenuItem x:Name="AutoShowItem" Header="إظهار تلقائي عند تغيير الأغنية" IsCheckable="True" Click="AutoShow_Click"/>
+                <MenuItem x:Name="HotkeyItem" Header="تفعيل الاختصار" IsCheckable="True" Click="Hotkey_Click"/>
+                <MenuItem Header="لون التمييز">
+                    <MenuItem x:Name="AccentAlbumItem" Header="لون الألبوم" IsCheckable="True" Click="AccentAlbum_Click"/>
+                    <MenuItem x:Name="AccentWindowsItem" Header="لون ويندوز" IsCheckable="True" Click="AccentWindows_Click"/>
+                </MenuItem>
                 <MenuItem Header="خروج" Click="Exit_Click"/>
             </ContextMenu>
         </Border.ContextMenu>
