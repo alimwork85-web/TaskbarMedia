@@ -185,7 +185,7 @@ internal sealed class Island : IDisposable
         _menu.Items.Add(Toggle("إخفاء في وضع ملء الشاشة", Settings.HideOnFullscreen, v => Settings.HideOnFullscreen = v));
         _menu.Items.Add(Toggle("اختصار Ctrl+Alt+M", Settings.HotkeyEnabled, v => { Settings.HotkeyEnabled = v; ApplyHotkey(); }));
         _menu.Items.Add(new WinForms.ToolStripSeparator());
-        _menu.Items.Add(new WinForms.ToolStripMenuItem(_bar.IsShown ? "إخفاء الشريط" : "إظهار الشريط", null, (_, _) => Toggle()));
+        _menu.Items.Add(new WinForms.ToolStripMenuItem(_bar.IsShown || _panel.IsShown ? "إخفاء الشريط" : "إظهار الشريط", null, (_, _) => Toggle()));
         _menu.Items.Add(new WinForms.ToolStripMenuItem("خروج", null, (_, _) => ((App)System.Windows.Application.Current).Quit()));
         MenuStyle.Apply(_menu, Palette.For(Theme.PopupSource(_media.Current.CoverColor)));
     }
