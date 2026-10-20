@@ -41,7 +41,9 @@ internal sealed class Island : IDisposable
 
         _tray = new WinForms.NotifyIcon { Icon = LoadIcon(), Text = "TaskbarMedia", ContextMenuStrip = _menu, Visible = true };
         _tray.MouseClick += (_, e) => { if (e.Button == WinForms.MouseButtons.Left) Toggle(); };
-        _menu.Opening += (_, _) => BuildMenu();
+        // Rebuild before the menu measures itself; rebuilding inside Opening left the island's menu laid out for the old items.
+        _menu.Opened += (_, _) => MenuStyle.Round(_menu.Handle);
+        _tray.MouseDown += (_, e) => { if (e.Button == WinForms.MouseButtons.Right) BuildMenu(); };
 
         _bar.CoverClicked += OpenPanel;
         // The settings menu is on the island itself (both sizes) as well as on the tray icon.
@@ -160,6 +162,7 @@ internal sealed class Island : IDisposable
 
     private void ShowMenu()
     {
+        BuildMenu();
         _menu.Show(WinForms.Cursor.Position);
         // The island never takes focus, so without this the menu would not close on Esc or a click elsewhere.
         Native.SetForegroundWindow(_menu.Handle);
@@ -184,6 +187,7 @@ internal sealed class Island : IDisposable
         _menu.Items.Add(new WinForms.ToolStripSeparator());
         _menu.Items.Add(new WinForms.ToolStripMenuItem(_bar.IsShown ? "إخفاء الشريط" : "إظهار الشريط", null, (_, _) => Toggle()));
         _menu.Items.Add(new WinForms.ToolStripMenuItem("خروج", null, (_, _) => ((App)System.Windows.Application.Current).Quit()));
+        MenuStyle.Apply(_menu, Palette.For(Theme.PopupSource(_media.Current.CoverColor)));
     }
 
     private static WinForms.ToolStripMenuItem Choice(string title, string current, Action<string> set, params (string Key, string Text)[] options)
