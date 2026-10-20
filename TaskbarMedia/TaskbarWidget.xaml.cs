@@ -61,6 +61,7 @@ public partial class TaskbarWidget : Window
         InitializeComponent();
         Settings.Load();
         HideFullscreenItem.IsChecked = Settings.HideOnFullscreen;
+        AlwaysVisibleItem.IsChecked = Settings.AlwaysVisible;
         AutoShowItem.IsChecked = Settings.AutoShowOnTrackChange;
         HotkeyItem.IsChecked = Settings.HotkeyEnabled;
         ShapeNormalItem.IsChecked = Settings.PanelShape == "Normal";
@@ -172,7 +173,7 @@ public partial class TaskbarWidget : Window
 
     private void UpdateFade()
     {
-        bool near = _quickBar.IsShown || _panel.IsShown || IsCursorNearTray();
+        bool near = Settings.AlwaysVisible || _quickBar.IsShown || _panel.IsShown || IsCursorNearTray();
         if (near == _nearTray) return;
         _nearTray = near;
         BeginAnimation(OpacityProperty, new DoubleAnimation(near ? 1 : 0, TimeSpan.FromMilliseconds(near ? 150 : 300)));
@@ -544,6 +545,7 @@ public partial class TaskbarWidget : Window
         _hoverBrush = new SolidColorBrush(light ? Color.FromArgb(0x18, 0, 0, 0) : Color.FromArgb(0x18, 0xFF, 0xFF, 0xFF));
     }
 
+    private void AlwaysVisible_Click(object sender, RoutedEventArgs e) { Settings.AlwaysVisible = AlwaysVisibleItem.IsChecked; Settings.Save(); }
     private void HideFullscreen_Click(object sender, RoutedEventArgs e) { Settings.HideOnFullscreen = HideFullscreenItem.IsChecked; Settings.Save(); }
     private void AutoShow_Click(object sender, RoutedEventArgs e) { Settings.AutoShowOnTrackChange = AutoShowItem.IsChecked; Settings.Save(); }
     private void Hotkey_Click(object sender, RoutedEventArgs e) { Settings.HotkeyEnabled = HotkeyItem.IsChecked; Settings.Save(); ApplyHotkey(); }

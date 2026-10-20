@@ -18,6 +18,8 @@ internal static class Settings
     public static string Position { get; set; } = "Auto";
     /// <summary>Large panel shape: "Normal" or "Capsule" (fully rounded ends).</summary>
     public static string PanelShape { get; set; } = "Normal";
+    /// <summary>Keep the icon fully shown instead of fading it out when the pointer leaves the tray.</summary>
+    public static bool AlwaysVisible { get; set; } = false;
 
     private sealed class Data
     {
@@ -27,6 +29,7 @@ internal static class Settings
         public string AccentMode { get; set; } = "Album";
         public string Position { get; set; } = "Auto";
         public string PanelShape { get; set; } = "Normal";
+        public bool AlwaysVisible { get; set; } = false;
     }
 
     public static void Load()
@@ -40,6 +43,7 @@ internal static class Settings
             AutoShowOnTrackChange = d.AutoShowOnTrackChange;
             HotkeyEnabled = d.HotkeyEnabled;
             AccentMode = d.AccentMode == "Windows" ? "Windows" : "Album";
+            AlwaysVisible = d.AlwaysVisible;
             PanelShape = d.PanelShape == "Capsule" ? "Capsule" : "Normal";
             Position = d.Position is "TopLeft" or "TopCenter" or "TopRight" or "BottomLeft" or "BottomRight" ? d.Position : "Auto";
         }
@@ -62,6 +66,7 @@ internal static class Settings
                 AccentMode = AccentMode,
                 Position = Position,
                 PanelShape = PanelShape,
+                AlwaysVisible = AlwaysVisible,
             };
             string tmp = FilePath + ".tmp";
             File.WriteAllText(tmp, JsonSerializer.Serialize(d, new JsonSerializerOptions { WriteIndented = true }));
