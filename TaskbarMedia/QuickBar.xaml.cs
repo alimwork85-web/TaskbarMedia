@@ -36,6 +36,12 @@ public partial class QuickBar : Window
 
         Apply(_media.Current);
         CoverGrid.MouseLeftButtonUp += (_, _) => CoverClicked?.Invoke();
+
+        // "Open on hover": resting on the cover briefly opens the large panel, no click needed.
+        var hoverTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
+        hoverTimer.Tick += (_, _) => { hoverTimer.Stop(); CoverClicked?.Invoke(); };
+        CoverGrid.MouseEnter += (_, _) => { if (Settings.PanelOpen == "Hover") hoverTimer.Start(); };
+        CoverGrid.MouseLeave += (_, _) => hoverTimer.Stop();
     }
 
     protected override void OnClosed(EventArgs e)

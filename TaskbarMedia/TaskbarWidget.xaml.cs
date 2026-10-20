@@ -62,6 +62,8 @@ public partial class TaskbarWidget : Window
         Settings.Load();
         HideFullscreenItem.IsChecked = Settings.HideOnFullscreen;
         AlwaysVisibleItem.IsChecked = Settings.AlwaysVisible;
+        OpenClickItem.IsChecked = Settings.PanelOpen == "Click";
+        OpenHoverItem.IsChecked = Settings.PanelOpen == "Hover";
         AutoShowItem.IsChecked = Settings.AutoShowOnTrackChange;
         HotkeyItem.IsChecked = Settings.HotkeyEnabled;
         ShapeNormalItem.IsChecked = Settings.PanelShape == "Normal";
@@ -543,6 +545,17 @@ public partial class TaskbarWidget : Window
 
         Foreground = light ? Brushes.Black : Brushes.White;
         _hoverBrush = new SolidColorBrush(light ? Color.FromArgb(0x18, 0, 0, 0) : Color.FromArgb(0x18, 0xFF, 0xFF, 0xFF));
+    }
+
+    private void OpenClick_Click(object sender, RoutedEventArgs e) => SetPanelOpen("Click");
+    private void OpenHover_Click(object sender, RoutedEventArgs e) => SetPanelOpen("Hover");
+
+    private void SetPanelOpen(string mode)
+    {
+        Settings.PanelOpen = mode;
+        OpenClickItem.IsChecked = mode == "Click";
+        OpenHoverItem.IsChecked = mode == "Hover";
+        Settings.Save();
     }
 
     private void AlwaysVisible_Click(object sender, RoutedEventArgs e) { Settings.AlwaysVisible = AlwaysVisibleItem.IsChecked; Settings.Save(); }

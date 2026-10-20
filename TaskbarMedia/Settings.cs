@@ -20,6 +20,8 @@ internal static class Settings
     public static string PanelShape { get; set; } = "Normal";
     /// <summary>Keep the icon fully shown instead of fading it out when the pointer leaves the tray.</summary>
     public static bool AlwaysVisible { get; set; } = false;
+    /// <summary>How the quick bar's cover opens the large panel: "Click" or "Hover".</summary>
+    public static string PanelOpen { get; set; } = "Click";
 
     private sealed class Data
     {
@@ -30,6 +32,7 @@ internal static class Settings
         public string Position { get; set; } = "Auto";
         public string PanelShape { get; set; } = "Normal";
         public bool AlwaysVisible { get; set; } = false;
+        public string PanelOpen { get; set; } = "Click";
     }
 
     public static void Load()
@@ -44,6 +47,7 @@ internal static class Settings
             HotkeyEnabled = d.HotkeyEnabled;
             AccentMode = d.AccentMode == "Windows" ? "Windows" : "Album";
             AlwaysVisible = d.AlwaysVisible;
+            PanelOpen = d.PanelOpen == "Hover" ? "Hover" : "Click";
             PanelShape = d.PanelShape == "Capsule" ? "Capsule" : "Normal";
             Position = d.Position is "TopLeft" or "TopCenter" or "TopRight" or "BottomLeft" or "BottomRight" ? d.Position : "Auto";
         }
@@ -67,6 +71,7 @@ internal static class Settings
                 Position = Position,
                 PanelShape = PanelShape,
                 AlwaysVisible = AlwaysVisible,
+                PanelOpen = PanelOpen,
             };
             string tmp = FilePath + ".tmp";
             File.WriteAllText(tmp, JsonSerializer.Serialize(d, new JsonSerializerOptions { WriteIndented = true }));

@@ -27,6 +27,10 @@
                     <MenuItem x:Name="ShapeNormalItem" Header="عادي" IsCheckable="True" Click="ShapeNormal_Click"/>
                     <MenuItem x:Name="ShapeCapsuleItem" Header="كبسولة" IsCheckable="True" Click="ShapeCapsule_Click"/>
                 </MenuItem>
+                <MenuItem Header="فتح اللوحة الكبيرة">
+                    <MenuItem x:Name="OpenClickItem" Header="بالضغط على الغلاف" IsCheckable="True" Click="OpenClick_Click"/>
+                    <MenuItem x:Name="OpenHoverItem" Header="بالتمرير على الغلاف" IsCheckable="True" Click="OpenHover_Click"/>
+                </MenuItem>
                 <MenuItem x:Name="AlwaysVisibleItem" Header="إظهار دائم" IsCheckable="True" Click="AlwaysVisible_Click"/>
                 <MenuItem x:Name="HideFullscreenItem" Header="إخفاء في وضع ملء الشاشة" IsCheckable="True" Click="HideFullscreen_Click"/>
                 <MenuItem x:Name="AutoShowItem" Header="إظهار تلقائي عند تغيير الأغنية" IsCheckable="True" Click="AutoShow_Click"/>
