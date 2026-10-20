@@ -18,4 +18,7 @@ internal static class Theme
             return Color.FromRgb((byte)abgr, (byte)(abgr >> 8), (byte)(abgr >> 16));
         return Color.FromRgb(0x4C, 0xC2, 0xFF);
     }
+
+    /// <summary>The color the popups are tinted with: the cover's color, or the Windows accent in "Windows" mode.</summary>
+    public static Color? PopupSource(Color? coverColor) => Settings.AccentMode == "Windows" ? Accent() : coverColor;
 }

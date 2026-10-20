@@ -118,17 +118,28 @@ public partial class QuickBar : Window
         Native.ShowWindow(_hwnd, Native.SW_HIDE);
     }
 
+    private MediaState? _lastState;
+
+    /// <summary>Re-tints with the current accent mode (called when the setting changes).</summary>
+    internal void RefreshAccent()
+    {
+        if (_lastState != null) Apply(_lastState);
+    }
+
     private void Apply(MediaState state)
     {
         TitleText.Text = state.Title;
         ArtistText.Text = state.Artist;
         CoverBrush.ImageSource = state.Cover;
 
+        _lastState = state;
+
         // Recolor (with a fade) only when the song's color actually changes.
-        if (state.CoverColor != _paletteSource)
+        var source = Theme.PopupSource(state.CoverColor);
+        if (source != _paletteSource)
         {
-            _paletteSource = state.CoverColor;
-            _palette = Palette.For(state.CoverColor);
+            _paletteSource = source;
+            _palette = Palette.For(source);
             _palette.ApplyTo(this, _background);
         }
 

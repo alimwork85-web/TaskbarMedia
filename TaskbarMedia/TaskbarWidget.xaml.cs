@@ -573,6 +573,8 @@ public partial class TaskbarWidget : Window
         AccentAlbumItem.IsChecked = mode == "Album";
         AccentWindowsItem.IsChecked = mode == "Windows";
         Settings.Save();
+        _quickBar.RefreshAccent();
+        _panel.RefreshAccent();
     }
 
     private void Exit_Click(object sender, RoutedEventArgs e) => ((App)Application.Current).Quit();
