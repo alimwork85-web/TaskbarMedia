@@ -9,14 +9,21 @@
         UseLayoutRounding="True">
 
     <!-- Outer margin leaves room for the shadow. -->
-    <Border x:Name="Root" Margin="12" CornerRadius="10" Padding="20" BorderThickness="1" Width="300">
+    <Border x:Name="Root" Margin="12" CornerRadius="10" Padding="20" BorderThickness="1" Width="460">
         <Border.Effect>
             <DropShadowEffect BlurRadius="20" ShadowDepth="3" Opacity="0.4"/>
         </Border.Effect>
 
-        <StackPanel>
-            <!-- Large cover, with a music-note placeholder underneath -->
-            <Grid Width="240" Height="240" HorizontalAlignment="Center">
+        <!-- Wide layout: cover on the leading side (right in RTL, left in LTR), controls in a column beside it. -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Cover, with a music-note placeholder underneath -->
+            <Grid Grid.Column="0" Width="160" Height="160" VerticalAlignment="Center">
                 <Border CornerRadius="8" Background="#33808080">
                     <TextBlock Text="&#xE8D6;" FontFamily="{StaticResource IconFont}" FontSize="64"
                                HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5"/>
@@ -28,7 +35,8 @@
                 </Border>
             </Grid>
 
-            <local:MarqueeText x:Name="TitleText" Margin="0,16,0,0" CenterWhenFits="True"
+            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+            <local:MarqueeText x:Name="TitleText" Margin="0" CenterWhenFits="True"
                                TextElement.FontSize="17" TextElement.FontWeight="SemiBold"/>
             <local:MarqueeText x:Name="ArtistText" Margin="0,4,0,0" CenterWhenFits="True"
                                TextElement.FontSize="13" Opacity="0.7"/>
@@ -57,6 +65,7 @@
                 <Button x:Name="NextButton" Style="{StaticResource IconButton}" Width="44" Height="44" FontSize="17" Content="&#xE893;" Click="Next_Click"/>
                 <Button x:Name="RepeatButton" Style="{StaticResource IconButton}" Width="44" Height="44" Content="&#xE8EE;" Click="Repeat_Click"/>
             </StackPanel>
-        </StackPanel>
+            </StackPanel>
+        </Grid>
     </Border>
 </Window>
