@@ -344,3 +344,57 @@ baseline-before-island-features
 ### إصلاح: تحديث لون ويندوز أثناء التشغيل
 
 **النسخة الاحتياطية:** `ab4d577`. مؤقت الـ tray الموجود (كل 1.5 ثانية) يستدعي الآن `RefreshAccent()` للشريط السريع واللوحة؛ و`RefreshAccent` لا تعيد `Apply` إلا إذا تغيّر اللون المختار فعلًا (فلا يُعاد ضبط النصوص أو المؤقتات). الوضع "الألبوم" لا يتأثر لأن لون الغلاف ثابت بين التحديثات. البناء: 0 تحذيرات، 0 أخطاء. لم أجرّب الواجهة. التراجع: `git reset --hard ab4d577`.
+
+---
+
+## ملخص المراجعة النهائي (لزميل المراجعة)
+
+**النطاق:** من الوسم `baseline-before-island-features` (`f6e4ce3`) إلى `e57fdff`. للمراجعة الكاملة: `git diff baseline-before-island-features HEAD -- . ':!PLAN.md'` (10 ملفات، +334 / -17). كل خطوة مسبوقة بالتزام نسخة احتياطية باسم `backup: before step N`، وتقريرها التفصيلي أعلاه في هذا السجل.
+
+### جدول الالتزامات
+| الخطوة | نسخة احتياطية | الالتزام | الملفات |
+|---|---|---|---|
+| 1 الإعدادات + القائمة | `0c3ce90` | `ce4b2be` | Settings.cs (جديد)، TaskbarWidget.xaml/.cs |
+| 1.5 تشخيص (بلا كود) | `5f05f8d` | `c02c4ce` | PLAN.md فقط |
+| 1.6 الشريط في الأعلى | `c5f0664` | `d5af1c1` | Native.cs، Popups.cs |
+| 1.7 خيار الموضع | `e5976ae` | `fb09d07` | Settings.cs، Popups.cs، TaskbarWidget.xaml/.cs |
+| 1.8 اللوحة الأفقية | `ad86f50` | `6e7d1ac` | NowPlayingPanel.xaml |
+| 2 ملء الشاشة | `34c6fcd` | `0ea1556` | Native.cs، TaskbarWidget.xaml.cs |
+| 3 إظهار عند تغيّر الأغنية | `7a6f6b4` | `535fea6` | TaskbarWidget.xaml.cs |
+| 4 الاختصار Ctrl+Alt+M | `a0ccb84` | `af82e42` | Native.cs، TaskbarWidget.xaml.cs |
+| 5 لون التمييز | `a70d10d` | `4a0085a` | Theme.cs، QuickBar/NowPlayingPanel.xaml.cs، TaskbarWidget.xaml.cs |
+| 6 README | `dc7b8fc` | `22dd23a` | README.md |
+| إصلاح: إغلاق اللوحة عند ملء الشاشة | `f8dbf52` | `f7fb79f` | TaskbarWidget.xaml.cs |
+| إصلاح: تحديث لون ويندوز حيًّا | `ab4d577` | `e57fdff` | TaskbarWidget.xaml.cs، QuickBar/NowPlayingPanel.xaml.cs |
+
+### ما تغيّر لكل ملف
+- **Settings.cs (جديد):** JSON في `%AppData%\TaskbarMedia\settings.json`؛ الحقول HideOnFullscreen=true، AutoShowOnTrackChange=false، HotkeyEnabled=true، AccentMode="Album"، Position="Auto". ملف تالف/مفقود/قيمة غير معروفة = الافتراضي. الحفظ إلى `.tmp` ثم `File.Move(overwrite)`.
+- **TaskbarWidget.xaml:** عناصر في قائمة الزر الأيمن قبل "خروج": ثلاثة عناصر تأشير، "لون التمييز" (خياران)، "الموضع" (5 خيارات). بلا أي تنسيق.
+- **TaskbarWidget.xaml.cs:** معالجات القائمة والحفظ الفوري؛ الموضع اليدوي (زاوية الشاشة الرئيسية، هامش 8 dip×DPI)؛ كشف ملء الشاشة في مؤقت الحراسة (250ms) كشرط AND إضافي؛ الإظهار التلقائي مع إغلاق بعد 4 ثوانٍ؛ تسجيل/إلغاء الاختصار العام و`WM_HOTKEY` والإخفاء اليدوي؛ استدعاء `RefreshAccent` فورًا وكل 1.5 ثانية.
+- **Native.cs:** `SHAppBarMessage`/`APPBARDATA`/ABM,ABE؛ `GetForegroundWindow`/`MonitorFromWindow`/`GetClassName`؛ `RegisterHotKey`/`UnregisterHotKey`/ثوابتها.
+- **Popups.cs:** `PlaceAbove` يفتح تحت الأيقونة عند شريط علوي أو زاوية علوية يدوية، وفوقها في السفلى، وضمن حدود الشاشة؛ Auto = السلوك القديم عند الشريط السفلي.
+- **NowPlayingPanel.xaml:** ترتيب أفقي فقط (Grid بثلاثة أعمدة): الغلاف على جهة البداية (يمين في RTL) وعمود العنوان/الفنان/التقدم/الأزرار. نفس العناصر والأسماء. الاستثناء الوحيد المسموح في التصميم.
+- **Theme.cs:** `PopupSource()` تختار لون الغلاف أو لون ويندوز. **QuickBar/NowPlayingPanel .xaml.cs:** `Apply` يستخدمها + `RefreshAccent()`.
+- **README.md:** قسم «الإعدادات» فقط.
+
+### تغييرات تصميم اضطرارية (تحتاج نظرة بصرية)
+في NowPlayingPanel.xaml: الغلاف 240→160، عرض الجذر 300→460، هامش العنوان العلوي 16→0. لم يُلمس لون/خط/حجم أيقونة/زاوية/ظل/حركة، ولا Palette.cs، ولا QuickBar.xaml.
+
+### ما لم يُتحقق منه (مهم)
+- **لم تُشغَّل الواجهة في أي خطوة**؛ كل الاختبارات اليدوية في تقارير الخطوات لم تُنفَّذ بعد. لم تُلتقط لقطتا قبل/بعد للوحة (1.8).
+- الشريط في الأسفل لم يُقَس (نقله تعديل لإعدادات النظام). التشخيص أُجري والشريط في الأعلى فقط.
+- البناء `dotnet build -c Release` نجح بعد كل خطوة: 0 تحذيرات، 0 أخطاء. لا توجد اختبارات آلية في المشروع.
+- التطبيق العامل في الجهاز ما زال `dist\TaskbarMedia.exe` القديم؛ لم يُنشر البناء الجديد إليه.
+
+### مخاطر وملاحظات للمراجع
+1. الزوايا السفلى اليدوية تتراكب فوق شريط المهام السفلي (حسب الطلب: rcMonitor).
+2. الأيقونة مملوكة لـ Shell_TrayWnd فتختفي معه إذا أُخفي تلقائيًا حتى في الأوضاع اليدوية.
+3. كشف ملء الشاشة: نافذة مكبّرة تغطي الشاشة كلها مع شريط مخفي تلقائيًا ستُعدّ ملء شاشة؛ يُستثنى Progman/WorkerW/Shell_TrayWnd فقط.
+4. الإظهار التلقائي: إعادة تشغيل نفس الأغنية (نفس العنوان والفنان) لا تُعدّ تغيّرًا.
+5. الإخفاء اليدوي (Ctrl+Alt+M) لا يُحفظ بين التشغيلات، ويُلغى عند تعطيل الاختصار.
+6. x الأيقونة يعتمد على UI Automation؛ عند فشله يسقط إلى TrayNotifyWnd (أضيق من الـ tray الحقيقي).
+7. README لا يذكر Settings.cs في «بنية المشروع»، ووصف اللوحة فيه ما زال عموديًا.
+8. `IsTaskbarTuckedAway` لا يكشف شريطًا علويًا مخفيًا تلقائيًا.
+
+### التراجع
+خطوة واحدة: `git reset --hard <نسخة الخطوة الاحتياطية>` من الجدول. الكل: `git reset --hard baseline-before-island-features`.
