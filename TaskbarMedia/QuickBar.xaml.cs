@@ -6,7 +6,7 @@ using System.Windows.Media.Animation;
 namespace TaskbarMedia;
 
 /// <summary>
-/// The quick-control bar that pops up above the taskbar while the mouse is over the cover icon.
+/// The island: a floating capsule with the cover, title and quick controls (see Island).
 /// Never takes focus, so the app you are using stays active.
 /// </summary>
 public partial class QuickBar : Window
@@ -36,12 +36,6 @@ public partial class QuickBar : Window
 
         Apply(_media.Current);
         CoverGrid.MouseLeftButtonUp += (_, _) => CoverClicked?.Invoke();
-
-        // "Open on hover": resting on the cover briefly opens the large panel, no click needed.
-        var hoverTimer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
-        hoverTimer.Tick += (_, _) => { hoverTimer.Stop(); CoverClicked?.Invoke(); };
-        CoverGrid.MouseEnter += (_, _) => { if (Settings.PanelOpen == "Hover") hoverTimer.Start(); };
-        CoverGrid.MouseLeave += (_, _) => hoverTimer.Stop();
     }
 
     protected override void OnClosed(EventArgs e)
@@ -61,44 +55,20 @@ public partial class QuickBar : Window
     }
 
     /// <summary>
-    /// Shows the bar above <paramref name="anchor"/> (screen px), leaning halfway away from the tray
-    /// into the free space over it: leftwards on right-to-left Windows, rightwards otherwise.
+    /// Shows the capsule at <paramref name="anchor"/> (see Popups.Place), with fully rounded ends.
     /// </summary>
-    /// <remarks>
-    /// When the taskbar floats (<paramref name="floatingFrame"/>), the bar lines up with the taskbar's
-    /// edge on the tray side and copies its rounded ends, so the two look like one piece.
-    /// </remarks>
-    internal void ShowAbove(Native.RECT anchor, bool rtl, Native.RECT? floatingFrame)
+    internal void ShowAt(Native.RECT anchor, bool top)
     {
         // WPF's Show() only the first time; after that the window is hidden/shown directly
-        // through Win32 so WPF doesn't redo its show/activation logic on every hover.
+        // through Win32 so WPF doesn't redo its show/activation logic every time.
         if (!IsVisible)
         {
             Opacity = 0;
             Show();
         }
-        UpdateLayout();
-
-        double scale = Native.GetDpiForWindow(_hwnd) / 96.0;
-        if (scale <= 0) scale = 1;
-        int? exactX = null;
-        if (floatingFrame is { } frame)
+        if (!IsShown)
         {
-            double frameRadius = (frame.Bottom - frame.Top) / 2.0 / scale;
-            double radius = Math.Min(frameRadius, Root.ActualHeight / 2);
-            Root.CornerRadius = new CornerRadius(radius);
-            // Keep the cover and buttons clear of the rounded ends.
-            Root.Padding = new Thickness(Math.Max(8, radius * 0.5), 6, Math.Max(8, radius * 0.5), 6);
-            UpdateLayout();
-
-            // Visible bar edge = taskbar edge; the window itself is wider by the shadow margin.
-            int margin = (int)Math.Round(Root.Margin.Left * scale);
-            int width = (int)Math.Ceiling(ActualWidth * scale);
-            exactX = rtl ? frame.Left - margin : frame.Right + margin - width;
-        }
-        else if (Settings.Position != "Auto")
-        {
-            // Away from the taskbar there is no frame to copy, so keep the capsule shape on its own.
+            // Pad the ends by half the height so the cover and buttons stay clear of the curve.
             Root.Padding = new Thickness(8, 6, 8, 6);
             UpdateLayout();
             double radius = Root.ActualHeight / 2;
@@ -106,14 +76,8 @@ public partial class QuickBar : Window
             Root.Padding = new Thickness(Math.Max(8, radius * 0.5), 6, Math.Max(8, radius * 0.5), 6);
             UpdateLayout();
         }
-        else
-        {
-            Root.CornerRadius = new CornerRadius(8);
-            Root.Padding = new Thickness(8, 6, 8, 6);
-            UpdateLayout();
-        }
 
-        Popups.PlaceAbove(this, _hwnd, anchor, Settings.Position == "TopCenter" ? Popups.Align.Center : rtl ? Popups.Align.LeanLeft : Popups.Align.LeanRight, exactX);
+        Popups.Place(this, _hwnd, anchor, top);
         IsShown = true;
         TitleText.Running = ArtistText.Running = true;
 

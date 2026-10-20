@@ -10,7 +10,7 @@ using Windows.Media;
 namespace TaskbarMedia;
 
 /// <summary>
-/// The large now-playing panel opened by clicking the cover in the quick bar.
+/// The large now-playing panel the island opens into.
 /// Closes when you click anywhere outside it (it loses activation) or press Esc.
 /// </summary>
 public partial class NowPlayingPanel : Window
@@ -68,14 +68,14 @@ public partial class NowPlayingPanel : Window
         Native.SetWindowLong(_hwnd, Native.GWL_EXSTYLE, ex | Native.WS_EX_TOOLWINDOW);
     }
 
-    /// <summary>Opens the panel above <paramref name="anchor"/> (screen px) and focuses it so Esc / click-outside close it.</summary>
-    internal void ShowAbove(Native.RECT anchor)
+    /// <summary>Opens the panel over the island (<paramref name="anchor"/>, see Popups.Place) and focuses it so Esc / click-outside close it.</summary>
+    internal void ShowAt(Native.RECT anchor, bool top)
     {
         // WPF's Show() only the first time; afterwards hide/show through Win32 (see QuickBar).
         Opacity = 0;
         if (!IsVisible) Show();
         ApplyShape();
-        Popups.PlaceAbove(this, _hwnd, anchor);
+        Popups.Place(this, _hwnd, anchor, top);
         IsShown = true;
         TitleText.Running = ArtistText.Running = true;
         UpdateSeekBar();
@@ -98,6 +98,9 @@ public partial class NowPlayingPanel : Window
     /// <summary>Whether the panel is currently on screen (WPF's IsVisible stays true once shown).</summary>
     public bool IsShown { get; private set; }
 
+    /// <summary>Raised when the panel closes, so the island can come back.</summary>
+    public event Action? Hidden;
+
     public void ClosePanel()
     {
         if (!IsShown) return;
@@ -108,6 +111,7 @@ public partial class NowPlayingPanel : Window
         BeginAnimation(OpacityProperty, null);
         Opacity = 0;
         Native.ShowWindow(_hwnd, Native.SW_HIDE);
+        Hidden?.Invoke();
     }
 
     private MediaState? _lastState;

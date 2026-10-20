@@ -4,11 +4,22 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <!-- The app starts as WPF, which reads its DPI awareness from app.manifest; this WinForms check does not apply. -->
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>TaskbarMedia</RootNamespace>
     <AssemblyName>TaskbarMedia</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- WinForms is only here for the tray icon; keep its names out of the WPF code. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+    <Resource Include="app.ico" />
+  </ItemGroup>
 
 </Project>

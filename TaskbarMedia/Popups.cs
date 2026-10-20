@@ -6,23 +6,10 @@ namespace TaskbarMedia;
 internal static class Popups
 {
     /// <summary>
-    /// Center: centered on the anchor. LeanLeft / LeanRight: halfway between centered and
-    /// lining up with the anchor's right / left edge, so the window leans to that side.
+    /// Moves an already-shown window to <paramref name="anchor"/> (screen px): centered on it, with its top edge on
+    /// anchor.Top (<paramref name="top"/>) or its bottom edge on anchor.Bottom, and kept inside the monitor's work area.
     /// </summary>
-    public enum Align { Center, LeanLeft, LeanRight }
-
-    private static bool IsTaskbarAtTop()
-    {
-        var data = new Native.APPBARDATA { cbSize = Marshal.SizeOf<Native.APPBARDATA>() };
-        return Native.SHAppBarMessage(Native.ABM_GETTASKBARPOS, ref data) != UIntPtr.Zero && data.uEdge == Native.ABE_TOP;
-    }
-
-    /// <summary>
-    /// Moves an already-shown window so it sits above <paramref name="anchor"/> (screen px),
-    /// resting on the taskbar and kept inside the monitor's work area.
-    /// <paramref name="exactX"/>, when given, is the window's left edge and overrides <paramref name="align"/>.
-    /// </summary>
-    public static void PlaceAbove(Window window, IntPtr hwnd, Native.RECT anchor, Align align = Align.Center, int? exactX = null)
+    public static void Place(Window window, IntPtr hwnd, Native.RECT anchor, bool top)
     {
         double scale = Native.GetDpiForWindow(hwnd) / 96.0;
         if (scale <= 0) scale = 1;
@@ -33,24 +20,8 @@ internal static class Popups
         Native.GetMonitorInfo(Native.MonitorFromRect(ref anchor, Native.MONITOR_DEFAULTTONEAREST), ref info);
         var work = info.rcWork;
 
-        int centered = (anchor.Left + anchor.Right) / 2 - width / 2;
-        int x = exactX ?? align switch
-        {
-            Align.LeanLeft => (centered + anchor.Right - width) / 2,
-            Align.LeanRight => (centered + anchor.Left) / 2,
-            _ => centered,
-        };
-        bool manual = Settings.Position != "Auto";
-        var area = manual ? info.rcMonitor : work;
-        x = Math.Clamp(x, area.Left, Math.Max(area.Left, area.Right - width));
-        // Manual corners open inward from the icon; otherwise it hangs below a top taskbar or rests on a bottom one.
-        int y;
-        if (manual)
-            y = Settings.Position.StartsWith("Top")
-                ? Math.Min(anchor.Bottom, Math.Max(area.Top, area.Bottom - height))
-                : Math.Max(area.Top, anchor.Top - height);
-        else
-            y = IsTaskbarAtTop() ? work.Top : work.Bottom - height;
+        int x = Math.Clamp((anchor.Left + anchor.Right) / 2 - width / 2, work.Left, Math.Max(work.Left, work.Right - width));
+        int y = Math.Clamp(top ? anchor.Top : anchor.Bottom - height, work.Top, Math.Max(work.Top, work.Bottom - height));
 
         // If something minimized the popup (e.g. Win+D, or tools that hide windows), it would
         // reappear as a tiny clipped minimized-size window; restore it first.

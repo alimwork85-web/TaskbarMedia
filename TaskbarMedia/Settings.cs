@@ -10,28 +10,26 @@ internal static class Settings
     private static readonly string FilePath = Path.Combine(Dir, "settings.json");
 
     public static bool HideOnFullscreen { get; set; } = true;
-    public static bool AutoShowOnTrackChange { get; set; } = false;
     public static bool HotkeyEnabled { get; set; } = true;
     /// <summary>"Album" or "Windows".</summary>
     public static string AccentMode { get; set; } = "Album";
-    /// <summary>"Auto" (follow the tray) | "TopLeft" | "TopCenter" | "TopRight" | "BottomLeft" | "BottomRight".</summary>
-    public static string Position { get; set; } = "Auto";
+    /// <summary>"TopLeft" | "TopCenter" | "TopRight" | "BottomLeft" | "BottomCenter" | "BottomRight".</summary>
+    public static string Position { get; set; } = "TopCenter";
+    /// <summary>When the island shows: "Always" (while something plays), "TrackChange" (a few seconds per new song) or "Manual" (tray icon / hotkey).</summary>
+    public static string IslandMode { get; set; } = "Always";
     /// <summary>Large panel shape: "Normal" or "Capsule" (fully rounded ends).</summary>
     public static string PanelShape { get; set; } = "Normal";
-    /// <summary>Keep the icon fully shown instead of fading it out when the pointer leaves the tray.</summary>
-    public static bool AlwaysVisible { get; set; } = false;
     /// <summary>How the quick bar's cover opens the large panel: "Click" or "Hover".</summary>
     public static string PanelOpen { get; set; } = "Click";
 
     private sealed class Data
     {
         public bool HideOnFullscreen { get; set; } = true;
-        public bool AutoShowOnTrackChange { get; set; } = false;
         public bool HotkeyEnabled { get; set; } = true;
         public string AccentMode { get; set; } = "Album";
-        public string Position { get; set; } = "Auto";
+        public string Position { get; set; } = "TopCenter";
+        public string IslandMode { get; set; } = "Always";
         public string PanelShape { get; set; } = "Normal";
-        public bool AlwaysVisible { get; set; } = false;
         public string PanelOpen { get; set; } = "Click";
     }
 
@@ -43,13 +41,12 @@ internal static class Settings
             var d = JsonSerializer.Deserialize<Data>(File.ReadAllText(FilePath));
             if (d == null) return;
             HideOnFullscreen = d.HideOnFullscreen;
-            AutoShowOnTrackChange = d.AutoShowOnTrackChange;
             HotkeyEnabled = d.HotkeyEnabled;
             AccentMode = d.AccentMode == "Windows" ? "Windows" : "Album";
-            AlwaysVisible = d.AlwaysVisible;
             PanelOpen = d.PanelOpen == "Hover" ? "Hover" : "Click";
             PanelShape = d.PanelShape == "Capsule" ? "Capsule" : "Normal";
-            Position = d.Position is "TopLeft" or "TopCenter" or "TopRight" or "BottomLeft" or "BottomRight" ? d.Position : "Auto";
+            Position = d.Position is "TopLeft" or "TopCenter" or "TopRight" or "BottomLeft" or "BottomCenter" or "BottomRight" ? d.Position : "TopCenter";
+            IslandMode = d.IslandMode is "TrackChange" or "Manual" ? d.IslandMode : "Always";
         }
         catch (Exception)
         {
@@ -65,12 +62,11 @@ internal static class Settings
             var d = new Data
             {
                 HideOnFullscreen = HideOnFullscreen,
-                AutoShowOnTrackChange = AutoShowOnTrackChange,
                 HotkeyEnabled = HotkeyEnabled,
                 AccentMode = AccentMode,
                 Position = Position,
+                IslandMode = IslandMode,
                 PanelShape = PanelShape,
-                AlwaysVisible = AlwaysVisible,
                 PanelOpen = PanelOpen,
             };
             string tmp = FilePath + ".tmp";

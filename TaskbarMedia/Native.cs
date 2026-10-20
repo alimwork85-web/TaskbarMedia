@@ -139,6 +139,12 @@ internal static class Native
     public const uint MONITOR_DEFAULTTONEAREST = 2;
 
     [DllImport("user32.dll")]
+    public static extern bool SetForegroundWindow(IntPtr hwnd);
+
+    [DllImport("shell32.dll")]
+    public static extern int SHQueryUserNotificationState(out int state);
+
+    [DllImport("user32.dll")]
     public static extern IntPtr GetForegroundWindow();
 
     [DllImport("user32.dll")]
