@@ -14,7 +14,7 @@ internal static class Settings
     public static bool HotkeyEnabled { get; set; } = true;
     /// <summary>"Album" or "Windows".</summary>
     public static string AccentMode { get; set; } = "Album";
-    /// <summary>"Auto" (follow the tray) | "TopLeft" | "TopRight" | "BottomLeft" | "BottomRight".</summary>
+    /// <summary>"Auto" (follow the tray) | "TopLeft" | "TopCenter" | "TopRight" | "BottomLeft" | "BottomRight".</summary>
     public static string Position { get; set; } = "Auto";
 
     private sealed class Data
@@ -37,7 +37,7 @@ internal static class Settings
             AutoShowOnTrackChange = d.AutoShowOnTrackChange;
             HotkeyEnabled = d.HotkeyEnabled;
             AccentMode = d.AccentMode == "Windows" ? "Windows" : "Album";
-            Position = d.Position is "TopLeft" or "TopRight" or "BottomLeft" or "BottomRight" ? d.Position : "Auto";
+            Position = d.Position is "TopLeft" or "TopCenter" or "TopRight" or "BottomLeft" or "BottomRight" ? d.Position : "Auto";
         }
         catch (Exception)
         {

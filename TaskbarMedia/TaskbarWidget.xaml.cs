@@ -318,7 +318,9 @@ public partial class TaskbarWidget : Window
             if (Native.GetMonitorInfo(Native.MonitorFromRect(ref origin, Native.MONITOR_DEFAULTTONEAREST), ref mon))
             {
                 int margin = (int)Math.Round(8 * scale);
-                x = Settings.Position.EndsWith("Left") ? mon.rcMonitor.Left + margin : mon.rcMonitor.Right - margin - width;
+                x = Settings.Position.EndsWith("Left") ? mon.rcMonitor.Left + margin
+                    : Settings.Position.EndsWith("Center") ? (mon.rcMonitor.Left + mon.rcMonitor.Right - width) / 2
+                    : mon.rcMonitor.Right - margin - width;
                 y = Settings.Position.StartsWith("Top") ? mon.rcMonitor.Top + margin : mon.rcMonitor.Bottom - margin - height;
                 _taskbarHidden = false;
             }
