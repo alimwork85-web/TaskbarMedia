@@ -96,6 +96,16 @@ public partial class QuickBar : Window
             int width = (int)Math.Ceiling(ActualWidth * scale);
             exactX = rtl ? frame.Left - margin : frame.Right + margin - width;
         }
+        else if (Settings.Position != "Auto")
+        {
+            // Away from the taskbar there is no frame to copy, so keep the capsule shape on its own.
+            Root.Padding = new Thickness(8, 6, 8, 6);
+            UpdateLayout();
+            double radius = Root.ActualHeight / 2;
+            Root.CornerRadius = new CornerRadius(radius);
+            Root.Padding = new Thickness(Math.Max(8, radius * 0.5), 6, Math.Max(8, radius * 0.5), 6);
+            UpdateLayout();
+        }
         else
         {
             Root.CornerRadius = new CornerRadius(8);
@@ -103,7 +113,7 @@ public partial class QuickBar : Window
             UpdateLayout();
         }
 
-        Popups.PlaceAbove(this, _hwnd, anchor, rtl ? Popups.Align.LeanLeft : Popups.Align.LeanRight, exactX);
+        Popups.PlaceAbove(this, _hwnd, anchor, Settings.Position == "TopCenter" ? Popups.Align.Center : rtl ? Popups.Align.LeanLeft : Popups.Align.LeanRight, exactX);
         IsShown = true;
         TitleText.Running = ArtistText.Running = true;
 
