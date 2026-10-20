@@ -144,8 +144,8 @@ internal sealed class Island : IDisposable
     {
         _hoverTimer.Stop();
         if (_panel.IsShown || !Native.GetWindowRect(_hwnd, out var bar)) return;
-        _bar.HideBar();
-        _panel.ShowAt(bar, IsTop);
+        _panel.ShowAt(bar, IsTop, new System.Windows.Size(_bar.Root.ActualWidth, _bar.Root.ActualHeight));
+        _bar.FadeOut();
     }
 
     private void Toggle()

@@ -88,6 +88,17 @@ public partial class QuickBar : Window
     /// <summary>Whether the bar is currently on screen (WPF's IsVisible stays true once shown).</summary>
     public bool IsShown { get; private set; }
 
+    /// <summary>Hides the bar with a short fade (used while the large panel grows out of it).</summary>
+    public void FadeOut()
+    {
+        if (!IsShown) return;
+        IsShown = false;
+        TitleText.Running = ArtistText.Running = false;
+        var fade = new DoubleAnimation(0, TimeSpan.FromMilliseconds(160));
+        fade.Completed += (_, _) => { if (!IsShown) Native.ShowWindow(_hwnd, Native.SW_HIDE); };
+        BeginAnimation(OpacityProperty, fade);
+    }
+
     public void HideBar()
     {
         if (!IsShown) return;

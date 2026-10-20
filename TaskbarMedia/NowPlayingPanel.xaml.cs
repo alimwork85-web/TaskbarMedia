@@ -46,6 +46,7 @@ public partial class NowPlayingPanel : Window
         Apply(_media.Current);
 
         _seekTimer.Tick += (_, _) => UpdateSeekBar();
+        Root.RenderTransform = _scale;
 
         Deactivated += (_, _) => ClosePanel();
         KeyDown += (_, e) => { if (e.Key == Key.Escape) ClosePanel(); };
@@ -69,9 +70,10 @@ public partial class NowPlayingPanel : Window
     }
 
     /// <summary>Opens the panel over the island (<paramref name="anchor"/>, see Popups.Place) and focuses it so Esc / click-outside close it.</summary>
-    internal void ShowAt(Native.RECT anchor, bool top)
+    internal void ShowAt(Native.RECT anchor, bool top, Size from)
     {
         // WPF's Show() only the first time; afterwards hide/show through Win32 (see QuickBar).
+        _closing = false;
         Opacity = 0;
         if (!IsVisible) Show();
         ApplyShape();
@@ -81,8 +83,41 @@ public partial class NowPlayingPanel : Window
         UpdateSeekBar();
         _seekTimer.Start();
         Activate();
-        BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(150)));
+
+        // Grow out of the island: start at the capsule's size, pinned to the edge it hangs from, and ease out to full size.
+        _from = from;
+        _scale.CenterX = Root.ActualWidth / 2;
+        _scale.CenterY = top ? 0 : Root.ActualHeight;
+        Morph(1, 1, 1, MorphOpen, null);
     }
+
+    private static readonly Duration MorphOpen = TimeSpan.FromMilliseconds(320);
+    private static readonly Duration MorphClose = TimeSpan.FromMilliseconds(220);
+    private readonly ScaleTransform _scale = new();
+    private Size _from;
+    private bool _closing;
+
+    /// <summary>Animates the panel's scale (from wherever it is now) and opacity together.</summary>
+    private void Morph(double sx, double sy, double opacity, Duration duration, EventHandler? done)
+    {
+        var ease = new CubicEase { EasingMode = sx >= 1 ? EasingMode.EaseOut : EasingMode.EaseIn };
+        if (sx >= 1 && Opacity == 0)
+        {
+            // Opening from closed: jump to the capsule's size first.
+            _scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+            _scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+            _scale.ScaleX = Ratio(_from.Width, Root.ActualWidth);
+            _scale.ScaleY = Ratio(_from.Height, Root.ActualHeight);
+        }
+        var x = new DoubleAnimation(sx, duration) { EasingFunction = ease };
+        if (done != null) x.Completed += done;
+        _scale.BeginAnimation(ScaleTransform.ScaleXProperty, x);
+        _scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(sy, duration) { EasingFunction = ease });
+        // The content fades a little faster than it moves, so it never looks squashed for long.
+        BeginAnimation(OpacityProperty, new DoubleAnimation(opacity, new Duration(duration.TimeSpan * 0.6)));
+    }
+
+    private static double Ratio(double part, double whole) => whole > 0 ? Math.Clamp(part / whole, 0.05, 1) : 1;
 
     /// <summary>Normal: 10px corners. Capsule: fully rounded ends, with wider side padding so the cover and controls stay clear of the curve.</summary>
     private void ApplyShape()
@@ -103,15 +138,23 @@ public partial class NowPlayingPanel : Window
 
     public void ClosePanel()
     {
-        if (!IsShown) return;
-        IsShown = false;
-        TitleText.Running = ArtistText.Running = false;
-        _seekTimer.Stop();
+        if (!IsShown || _closing) return;
+        _closing = true;
         EndDrag();
-        BeginAnimation(OpacityProperty, null);
-        Opacity = 0;
-        Native.ShowWindow(_hwnd, Native.SW_HIDE);
-        Hidden?.Invoke();
+
+        // Shrink back into the island, then hide; the island fades back in when Hidden fires.
+        Morph(Ratio(_from.Width, Root.ActualWidth), Ratio(_from.Height, Root.ActualHeight), 0, MorphClose, (_, _) =>
+        {
+            if (!_closing) return; // reopened while shrinking
+            _closing = false;
+            IsShown = false;
+            TitleText.Running = ArtistText.Running = false;
+            _seekTimer.Stop();
+            BeginAnimation(OpacityProperty, null);
+            Opacity = 0;
+            Native.ShowWindow(_hwnd, Native.SW_HIDE);
+            Hidden?.Invoke();
+        });
     }
 
     private MediaState? _lastState;
