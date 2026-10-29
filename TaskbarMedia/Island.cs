@@ -178,6 +178,8 @@ internal sealed class Island : IDisposable
             ("Always", "دائمًا أثناء التشغيل"), ("TrackChange", "عند تغيير الأغنية فقط"), ("Manual", "يدويًا (الأيقونة أو Ctrl+Alt+M)")));
         _menu.Items.Add(Choice("فتح اللوحة الكبيرة", Settings.PanelOpen, v => Settings.PanelOpen = v,
             ("Hover", "بالتمرير فوق الشريط"), ("Click", "بالضغط على الغلاف")));
+        _menu.Items.Add(Choice("التصميم", Settings.Style, v => { Settings.Style = v; _bar.ApplyStyle(); Update(); },
+            ("Disc", "أسطوانة"), ("Ribbon", "شريط")));
         _menu.Items.Add(Choice("شكل اللوحة الكبيرة", Settings.PanelShape, v => Settings.PanelShape = v,
             ("Capsule", "كبسولة"), ("Normal", "عادي")));
         _menu.Items.Add(Choice("الألوان", Settings.AccentMode, v => { Settings.AccentMode = v; _bar.RefreshAccent(); _panel.RefreshAccent(); },

@@ -21,6 +21,8 @@ internal static class Settings
     public static string PanelShape { get; set; } = "Normal";
     /// <summary>How the quick bar's cover opens the large panel: "Click" or "Hover".</summary>
     public static string PanelOpen { get; set; } = "Click";
+    /// <summary>Look of the island and the large panel: "Disc" (spinning round cover) or "Ribbon" (square cover, progress line).</summary>
+    public static string Style { get; set; } = "Disc";
 
     private sealed class Data
     {
@@ -31,6 +33,7 @@ internal static class Settings
         public string IslandMode { get; set; } = "Always";
         public string PanelShape { get; set; } = "Normal";
         public string PanelOpen { get; set; } = "Click";
+        public string Style { get; set; } = "Disc";
     }
 
     public static void Load()
@@ -45,6 +48,7 @@ internal static class Settings
             AccentMode = d.AccentMode == "Windows" ? "Windows" : "Album";
             PanelOpen = d.PanelOpen == "Hover" ? "Hover" : "Click";
             PanelShape = d.PanelShape == "Capsule" ? "Capsule" : "Normal";
+            Style = d.Style == "Ribbon" ? "Ribbon" : "Disc";
             Position = d.Position is "TopLeft" or "TopCenter" or "TopRight" or "BottomLeft" or "BottomCenter" or "BottomRight" ? d.Position : "TopCenter";
             IslandMode = d.IslandMode is "TrackChange" or "Manual" ? d.IslandMode : "Always";
         }
@@ -68,6 +72,7 @@ internal static class Settings
                 IslandMode = IslandMode,
                 PanelShape = PanelShape,
                 PanelOpen = PanelOpen,
+                Style = Style,
             };
             string tmp = FilePath + ".tmp";
             File.WriteAllText(tmp, JsonSerializer.Serialize(d, new JsonSerializerOptions { WriteIndented = true }));

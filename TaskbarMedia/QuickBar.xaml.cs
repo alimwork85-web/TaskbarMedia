@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 
 namespace TaskbarMedia;
 
@@ -20,6 +21,8 @@ public partial class QuickBar : Window
     private Palette _palette = Palette.For(null);
     private Color? _paletteSource;
     private IntPtr _hwnd;
+    private readonly DispatcherTimer _progressTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private bool _playing;
 
     public QuickBar(MediaService media)
     {
@@ -33,7 +36,10 @@ public partial class QuickBar : Window
         Root.Background = _background;
         _background.Color = _palette.Background;
         Foreground = _palette.Foreground;
+        DiscCover.Hole = _background;
+        _progressTimer.Tick += (_, _) => UpdateProgress();
 
+        ApplyStyle();
         Apply(_media.Current);
         CoverGrid.MouseLeftButtonUp += (_, _) => CoverClicked?.Invoke();
     }
@@ -66,7 +72,12 @@ public partial class QuickBar : Window
             Opacity = 0;
             Show();
         }
-        if (!IsShown)
+        if (!IsShown && Settings.Style == "Ribbon")
+        {
+            Root.CornerRadius = new CornerRadius(12);
+            Root.Padding = new Thickness(10, 6, 10, 5);
+        }
+        else if (!IsShown)
         {
             // Pad the ends by half the height so the cover and buttons stay clear of the curve.
             Root.Padding = new Thickness(8, 6, 8, 6);
@@ -80,6 +91,7 @@ public partial class QuickBar : Window
         Popups.Place(this, _hwnd, anchor, top);
         IsShown = true;
         TitleText.Running = ArtistText.Running = true;
+        RefreshMotion();
 
         if (Opacity < 1)
             BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(120)));
@@ -94,6 +106,7 @@ public partial class QuickBar : Window
         if (!IsShown) return;
         IsShown = false;
         TitleText.Running = ArtistText.Running = false;
+        RefreshMotion();
         var fade = new DoubleAnimation(0, TimeSpan.FromMilliseconds(160));
         fade.Completed += (_, _) => { if (!IsShown) Native.ShowWindow(_hwnd, Native.SW_HIDE); };
         BeginAnimation(OpacityProperty, fade);
@@ -104,6 +117,7 @@ public partial class QuickBar : Window
         if (!IsShown) return;
         IsShown = false;
         TitleText.Running = ArtistText.Running = false;
+        RefreshMotion();
         BeginAnimation(OpacityProperty, null);
         Opacity = 0;
         Native.ShowWindow(_hwnd, Native.SW_HIDE);
@@ -117,11 +131,42 @@ public partial class QuickBar : Window
         if (_lastState != null && Theme.PopupSource(_lastState.CoverColor) != _paletteSource) Apply(_lastState);
     }
 
+    /// <summary>Switches between the "Disc" and "Ribbon" looks (Settings.Style); the caller shows the bar again.</summary>
+    internal void ApplyStyle()
+    {
+        bool disc = Settings.Style == "Disc";
+        DiscCover.Visibility = disc ? Visibility.Visible : Visibility.Collapsed;
+        SquareCover.Visibility = ProgressLine.Visibility = disc ? Visibility.Collapsed : Visibility.Visible;
+        ArtistText.Visibility = disc ? Visibility.Visible : Visibility.Collapsed;
+        if (_lastState != null) Apply(_lastState);
+        HideBar(); // shape and size are worked out again on the next show
+    }
+
+    /// <summary>Spinning and the progress timer run only while the bar is on screen and something plays.</summary>
+    private void RefreshMotion()
+    {
+        bool live = IsShown && _playing;
+        DiscCover.Spinning = live && Settings.Style == "Disc";
+        if (live) _progressTimer.Start(); else _progressTimer.Stop();
+        UpdateProgress();
+    }
+
+    private void UpdateProgress()
+    {
+        var t = _media.GetTimeline();
+        double fraction = t is { } v ? v.Position / v.Duration : 0;
+        DiscCover.Progress = fraction;
+        ProgressFill.Width = ProgressLine.ActualWidth * Math.Clamp(fraction, 0, 1);
+    }
+
     private void Apply(MediaState state)
     {
-        TitleText.Text = state.Title;
+        bool ribbon = Settings.Style == "Ribbon";
+        TitleText.Text = ribbon && state.Artist.Length > 0 && state.Title.Length > 0 ? state.Title + " — " + state.Artist : state.Title;
         ArtistText.Text = state.Artist;
         CoverBrush.ImageSource = state.Cover;
+        DiscCover.Cover = state.Cover;
+        Body.Opacity = state.IsPlaying ? 1 : 0.75;
 
         _lastState = state;
 
@@ -139,6 +184,8 @@ public partial class QuickBar : Window
         PlayPauseButton.IsEnabled = state.CanPlayPause;
         NextButton.IsEnabled = state.CanNext;
 
+        _playing = state.IsPlaying;
+        RefreshMotion();
         if (!state.HasSession) HideBar();
     }
 

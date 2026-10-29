@@ -14,29 +14,46 @@
             <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.35"/>
         </Border.Effect>
 
-        <StackPanel Orientation="Horizontal">
-            <!-- Cover art, with a music-note placeholder underneath -->
-            <Grid x:Name="CoverGrid" Width="40" Height="40" VerticalAlignment="Center" Cursor="Hand"
-                  ToolTip="عرض التفاصيل">
-                <Border CornerRadius="5" Background="#33808080">
-                    <TextBlock Text="&#xE8D6;" FontFamily="{StaticResource IconFont}" FontSize="16"
-                               HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.7"/>
-                </Border>
-                <Border CornerRadius="5">
-                    <Border.Background>
-                        <ImageBrush x:Name="CoverBrush" Stretch="UniformToFill"/>
-                    </Border.Background>
-                </Border>
-            </Grid>
+        <Grid x:Name="Body">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-            <StackPanel Margin="10,0,10,0" Width="170" VerticalAlignment="Center">
-                <local:MarqueeText x:Name="TitleText" TextElement.FontSize="13" TextElement.FontWeight="SemiBold"/>
-                <local:MarqueeText x:Name="ArtistText" TextElement.FontSize="12" Opacity="0.7"/>
+            <StackPanel Orientation="Horizontal">
+                <!-- Cover: a spinning record ("Disc" style) or a small square ("Ribbon" style) -->
+                <Grid x:Name="CoverGrid" VerticalAlignment="Center" Cursor="Hand" ToolTip="عرض التفاصيل">
+                    <local:Disc x:Name="DiscCover" Width="40" Height="40" RingThickness="2.5"/>
+                    <Grid x:Name="SquareCover" Width="28" Height="28">
+                        <Border CornerRadius="6" Background="#33808080">
+                            <TextBlock Text="&#xE8D6;" FontFamily="{StaticResource IconFont}" FontSize="12"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.7"/>
+                        </Border>
+                        <Border CornerRadius="6">
+                            <Border.Background>
+                                <ImageBrush x:Name="CoverBrush" Stretch="UniformToFill"/>
+                            </Border.Background>
+                        </Border>
+                    </Grid>
+                </Grid>
+
+                <StackPanel Margin="10,0,10,0" Width="170" VerticalAlignment="Center">
+                    <local:MarqueeText x:Name="TitleText" TextElement.FontSize="13" TextElement.FontWeight="SemiBold"/>
+                    <local:MarqueeText x:Name="ArtistText" TextElement.FontSize="12" Opacity="0.7"/>
+                </StackPanel>
+
+                <Button x:Name="PrevButton" Style="{StaticResource IconButton}" Content="&#xE892;" Click="Prev_Click"/>
+                <Button x:Name="PlayPauseButton" Style="{StaticResource IconButton}" Content="&#xE768;" FontSize="17" Click="PlayPause_Click"/>
+                <Button x:Name="NextButton" Style="{StaticResource IconButton}" Content="&#xE893;" Click="Next_Click"/>
             </StackPanel>
 
-            <Button x:Name="PrevButton" Style="{StaticResource IconButton}" Content="&#xE892;" Click="Prev_Click"/>
-            <Button x:Name="PlayPauseButton" Style="{StaticResource IconButton}" Content="&#xE768;" FontSize="17" Click="PlayPause_Click"/>
-            <Button x:Name="NextButton" Style="{StaticResource IconButton}" Content="&#xE893;" Click="Next_Click"/>
-        </StackPanel>
+            <!-- "Ribbon" style: the bottom edge is the progress line -->
+            <Grid x:Name="ProgressLine" Grid.Row="1" Height="3" Margin="10,4,10,0">
+                <Border CornerRadius="1.5" Opacity="0.25"
+                        Background="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                <Border x:Name="ProgressFill" CornerRadius="1.5" HorizontalAlignment="Left" Width="0"
+                        Background="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Window}}"/>
+            </Grid>
+        </Grid>
     </Border>
 </Window>
