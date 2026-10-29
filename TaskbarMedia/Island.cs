@@ -156,9 +156,27 @@ internal sealed class Island : IDisposable
         Update();
     }
 
-    // QUNS_BUSY / QUNS_RUNNING_D3D_FULL_SCREEN / QUNS_PRESENTATION_MODE: Windows itself says a full-screen app is up.
+    // QUNS_RUNNING_D3D_FULL_SCREEN / QUNS_PRESENTATION_MODE: Windows itself says a full-screen app is up.
+    // QUNS_BUSY is also raised by transparent screen-sized overlays (Lightshot, Claude), so it only counts
+    // when the foreground window really covers its monitor.
     private static bool IsFullscreenAppRunning() =>
-        Native.SHQueryUserNotificationState(out int state) == 0 && state is 2 or 3 or 4;
+        Native.SHQueryUserNotificationState(out int state) == 0 && (state is 3 or 4 || state == 2 && IsForegroundFullscreen());
+
+    /// <summary>True when the foreground window (not the desktop or shell) covers its whole monitor.</summary>
+    private static bool IsForegroundFullscreen()
+    {
+        IntPtr fg = Native.GetForegroundWindow();
+        if (fg == IntPtr.Zero || !Native.GetWindowRect(fg, out var r)) return false;
+
+        var name = new System.Text.StringBuilder(64);
+        Native.GetClassName(fg, name, name.Capacity);
+        if (name.ToString() is "Progman" or "WorkerW" or "Shell_TrayWnd" or "Shell_SecondaryTrayWnd") return false;
+
+        var info = new Native.MONITORINFO { cbSize = System.Runtime.InteropServices.Marshal.SizeOf<Native.MONITORINFO>() };
+        if (!Native.GetMonitorInfo(Native.MonitorFromWindow(fg, Native.MONITOR_DEFAULTTONEAREST), ref info)) return false;
+        var m = info.rcMonitor;
+        return r.Left <= m.Left && r.Top <= m.Top && r.Right >= m.Right && r.Bottom >= m.Bottom;
+    }
 
     private void ShowMenu()
     {
