@@ -22,8 +22,13 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Cover, with a music-note placeholder underneath -->
-            <Grid Grid.Column="0" Width="160" Height="160" VerticalAlignment="Center">
+            <!-- "Disc" style: the cover as a spinning record; its ring is the seek bar (click or drag on it) -->
+            <local:Disc x:Name="DiscCover" Grid.Column="0" Width="150" Height="150" RingThickness="4" RingGap="5"
+                        VerticalAlignment="Center" Cursor="Hand"
+                        MouseLeftButtonDown="Seek_MouseDown" MouseMove="Seek_MouseMove" MouseLeftButtonUp="Seek_MouseUp"/>
+
+            <!-- "Ribbon" style: a tall strip of the cover, with a music-note placeholder underneath -->
+            <Grid x:Name="SquareCover" Grid.Column="0" Width="120" MinHeight="160">
                 <Border CornerRadius="8" Background="#33808080">
                     <TextBlock Text="&#xE8D6;" FontFamily="{StaticResource IconFont}" FontSize="64"
                                HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5"/>
@@ -36,10 +41,17 @@
             </Grid>
 
             <StackPanel Grid.Column="2" VerticalAlignment="Center">
-            <local:MarqueeText x:Name="TitleText" Margin="0" CenterWhenFits="True"
-                               TextElement.FontSize="17" TextElement.FontWeight="SemiBold"/>
-            <local:MarqueeText x:Name="ArtistText" Margin="0,4,0,0" CenterWhenFits="True"
-                               TextElement.FontSize="13" Opacity="0.7"/>
+            <!-- Title and artist swap rows by style: the "Ribbon" title sits under the artist, large, in Amiri -->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <local:MarqueeText x:Name="TitleText" Margin="0" CenterWhenFits="True"
+                                   TextElement.FontSize="17" TextElement.FontWeight="SemiBold"/>
+                <local:MarqueeText x:Name="ArtistText" Grid.Row="1" Margin="0,4,0,0" CenterWhenFits="True"
+                                   TextElement.FontSize="13" Opacity="0.7"/>
+            </Grid>
 
             <!-- Seek bar: click or drag to jump anywhere in the track -->
             <StackPanel x:Name="SeekArea" Width="240" Margin="0,12,0,0" FlowDirection="LeftToRight">

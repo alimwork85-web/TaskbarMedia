@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -29,6 +31,9 @@ public partial class NowPlayingPanel : Window
     private bool _dragging;
     private TimeSpan? _seekHeld;      // where we just jumped to, shown until the app reports the new position
     private DateTime _seekHeldUntil;
+    private bool _playing;
+
+    private static readonly FontFamily Amiri = new(new Uri("pack://application:,,,/"), "./Fonts/#Amiri");
 
     public NowPlayingPanel(MediaService media)
     {
@@ -42,6 +47,7 @@ public partial class NowPlayingPanel : Window
         Root.Background = _background;
         _background.Color = _palette.Background;
         Foreground = _palette.Foreground;
+        DiscCover.Hole = _background;
 
         Apply(_media.Current);
 
@@ -76,10 +82,12 @@ public partial class NowPlayingPanel : Window
         _closing = false;
         Opacity = 0;
         if (!IsVisible) Show();
+        ApplyStyle();
         ApplyShape();
         Popups.Place(this, _hwnd, anchor, top);
         IsShown = true;
         TitleText.Running = ArtistText.Running = true;
+        RefreshSpin();
         UpdateSeekBar();
         _seekTimer.Start();
         Activate();
@@ -117,6 +125,26 @@ public partial class NowPlayingPanel : Window
         BeginAnimation(OpacityProperty, new DoubleAnimation(opacity, new Duration(duration.TimeSpan * 0.6)));
     }
 
+    /// <summary>"Disc": spinning record whose ring is the seek bar. "Ribbon": cover strip, the artist over a large Amiri title, a line seek bar.</summary>
+    private void ApplyStyle()
+    {
+        bool disc = Settings.Style == "Disc";
+        DiscCover.Visibility = disc ? Visibility.Visible : Visibility.Collapsed;
+        SquareCover.Visibility = disc ? Visibility.Collapsed : Visibility.Visible;
+        SeekBar.Visibility = disc ? Visibility.Collapsed : Visibility.Visible; // the times stay; the ring does the seeking
+        Grid.SetRow(TitleText, disc ? 0 : 1);
+        Grid.SetRow(ArtistText, disc ? 1 : 0);
+        TitleText.Margin = disc ? new Thickness(0) : new Thickness(0, 2, 0, 6);
+        ArtistText.Margin = disc ? new Thickness(0, 4, 0, 0) : new Thickness(0);
+        if (disc) TitleText.ClearValue(TextElement.FontFamilyProperty);
+        else TitleText.SetValue(TextElement.FontFamilyProperty, Amiri);
+        TitleText.SetValue(TextElement.FontSizeProperty, disc ? 17.0 : 30.0);
+        TitleText.SetValue(TextElement.FontWeightProperty, disc ? FontWeights.SemiBold : FontWeights.Normal);
+    }
+
+    /// <summary>The record spins only while the panel is open and something plays.</summary>
+    private void RefreshSpin() => DiscCover.Spinning = IsShown && _playing && Settings.Style == "Disc";
+
     private static double Ratio(double part, double whole) => whole > 0 ? Math.Clamp(part / whole, 0.05, 1) : 1;
 
     /// <summary>Normal: 10px corners. Capsule: fully rounded ends, with wider side padding so the cover and controls stay clear of the curve.</summary>
@@ -149,6 +177,7 @@ public partial class NowPlayingPanel : Window
             _closing = false;
             IsShown = false;
             TitleText.Running = ArtistText.Running = false;
+            RefreshSpin();
             _seekTimer.Stop();
             BeginAnimation(OpacityProperty, null);
             Opacity = 0;
@@ -170,6 +199,9 @@ public partial class NowPlayingPanel : Window
         TitleText.Text = state.Title;
         ArtistText.Text = state.Artist;
         CoverBrush.ImageSource = state.Cover;
+        DiscCover.Cover = state.Cover;
+        _playing = state.IsPlaying;
+        RefreshSpin();
 
         _lastState = state;
 
@@ -238,12 +270,21 @@ public partial class NowPlayingPanel : Window
         double fraction = _duration > TimeSpan.Zero ? Math.Clamp(position / _duration, 0, 1) : 0;
         double width = SeekBar.ActualWidth;
         SeekFill.Width = width * fraction;
+        DiscCover.Progress = fraction;
         SeekThumb.Margin = new Thickness(Math.Clamp(width * fraction - SeekThumb.Width / 2, 0, Math.Max(0, width - SeekThumb.Width)), 0, 0, 0);
         ElapsedText.Text = FormatTime(position);
     }
 
     private TimeSpan PositionAt(MouseEventArgs e)
     {
+        if (Settings.Style == "Disc")
+        {
+            // Angle clockwise from 12 o'clock around the record's center = how far into the track.
+            var p = e.GetPosition(DiscCover);
+            double c = DiscCover.ActualWidth / 2;
+            double turn = Math.Atan2(p.X - c, c - p.Y) / (2 * Math.PI);
+            return _duration * (turn < 0 ? turn + 1 : turn);
+        }
         double width = SeekBar.ActualWidth;
         double fraction = width > 0 ? Math.Clamp(e.GetPosition(SeekBar).X / width, 0, 1) : 0;
         return _duration * fraction;
@@ -252,8 +293,15 @@ public partial class NowPlayingPanel : Window
     private void Seek_MouseDown(object sender, MouseButtonEventArgs e)
     {
         if (!_canSeek || _duration <= TimeSpan.Zero) return;
+        if (sender == DiscCover)
+        {
+            // Only the ring seeks; a click on the cover itself does nothing.
+            var p = e.GetPosition(DiscCover);
+            double c = DiscCover.ActualWidth / 2;
+            if (Math.Sqrt((p.X - c) * (p.X - c) + (p.Y - c) * (p.Y - c)) < c - DiscCover.RingThickness - DiscCover.RingGap - 6) return;
+        }
         _dragging = true;
-        SeekBar.CaptureMouse();
+        ((UIElement)sender).CaptureMouse();
         DrawSeek(PositionAt(e));
         e.Handled = true;
     }
@@ -278,6 +326,7 @@ public partial class NowPlayingPanel : Window
     {
         _dragging = false;
         if (SeekBar.IsMouseCaptured) SeekBar.ReleaseMouseCapture();
+        if (DiscCover.IsMouseCaptured) DiscCover.ReleaseMouseCapture();
     }
 
     private static string FormatTime(TimeSpan t) =>
