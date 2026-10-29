@@ -140,6 +140,8 @@ public partial class NowPlayingPanel : Window
         else TitleText.SetValue(TextElement.FontFamilyProperty, Amiri);
         TitleText.SetValue(TextElement.FontSizeProperty, disc ? 17.0 : 30.0);
         TitleText.SetValue(TextElement.FontWeightProperty, disc ? FontWeights.SemiBold : FontWeights.Normal);
+        // The large Ribbon title would otherwise widen the panel past the screen; capped, it scrolls instead.
+        Root.MaxWidth = disc ? double.PositiveInfinity : 760;
     }
 
     /// <summary>The record spins only while the panel is open and something plays.</summary>
