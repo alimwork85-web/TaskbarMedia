@@ -13,6 +13,15 @@
     <RootNamespace>TaskbarMedia</RootNamespace>
     <AssemblyName>TaskbarMedia</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- Shown in the EXE's Properties > Details. -->
+    <Version>1.1.0</Version>
+    <Product>TaskbarMedia</Product>
+    <AssemblyTitle>TaskbarMedia</AssemblyTitle>
+    <Description>Floating media island for Windows 11</Description>
+    <Authors>Ali Alhumedi</Authors>
+    <Company>Ali Alhumedi</Company>
+    <Copyright>© 2026 Ali Alhumedi</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
