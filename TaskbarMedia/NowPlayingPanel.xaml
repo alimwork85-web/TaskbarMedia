@@ -24,7 +24,7 @@
 
             <!-- "Disc" style: the cover as a spinning record; its ring is the seek bar (click or drag on it) -->
             <local:Disc x:Name="DiscCover" Grid.Column="0" Width="150" Height="150" RingThickness="4" RingGap="5"
-                        VerticalAlignment="Center" Cursor="Hand"
+                        VerticalAlignment="Center" Cursor="Hand" Background="Transparent"
                         MouseLeftButtonDown="Seek_MouseDown" MouseMove="Seek_MouseMove" MouseLeftButtonUp="Seek_MouseUp"/>
 
             <!-- "Ribbon" style: a tall strip of the cover, with a music-note placeholder underneath -->

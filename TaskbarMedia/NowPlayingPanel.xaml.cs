@@ -298,7 +298,9 @@ public partial class NowPlayingPanel : Window
             // Only the ring seeks; a click on the cover itself does nothing.
             var p = e.GetPosition(DiscCover);
             double c = DiscCover.ActualWidth / 2;
-            if (Math.Sqrt((p.X - c) * (p.X - c) + (p.Y - c) * (p.Y - c)) < c - DiscCover.RingThickness - DiscCover.RingGap - 6) return;
+            // The transparent background makes the whole square clickable; keep it to a band around the ring.
+            double d = Math.Sqrt((p.X - c) * (p.X - c) + (p.Y - c) * (p.Y - c));
+            if (d < c - DiscCover.RingThickness - DiscCover.RingGap - 6 || d > c + 6) return;
         }
         _dragging = true;
         ((UIElement)sender).CaptureMouse();
