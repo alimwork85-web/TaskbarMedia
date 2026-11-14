@@ -19,6 +19,15 @@ internal static class Theme
         return Color.FromRgb(0x4C, 0xC2, 0xFF);
     }
 
-    /// <summary>The color the popups are tinted with: the cover's color, or the Windows accent in "Windows" mode.</summary>
-    public static Color? PopupSource(Color? coverColor) => Settings.AccentMode == "Windows" ? Accent() : coverColor;
+    /// <summary>
+    /// The color the popups are tinted with: the cover's color, or the Windows accent in "Windows" mode.
+    /// "Black" mode: the cover's color (or the accent) with alpha 0, which Palette.For reads as "black, with this accent";
+    /// a distinct value, so switching modes or covers still triggers a recolor.
+    /// </summary>
+    public static Color? PopupSource(Color? coverColor) => Settings.AccentMode switch
+    {
+        "Windows" => Accent(),
+        "Black" => (coverColor ?? Accent()) with { A = 0 },
+        _ => coverColor,
+    };
 }

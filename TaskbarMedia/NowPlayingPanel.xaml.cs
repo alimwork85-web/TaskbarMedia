@@ -46,6 +46,7 @@ public partial class NowPlayingPanel : Window
         Root.Background = Palette.Surface(_background);
         _background.Color = _palette.Background;
         Foreground = _palette.Foreground;
+        Resources["ProgressBrush"] = _palette.Progress;
         DiscCover.Hole = _background;
 
         Apply(_media.Current);

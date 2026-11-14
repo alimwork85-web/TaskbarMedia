@@ -73,9 +73,10 @@ public sealed class Disc : Grid
         Children.Add(_thumb);
         Loaded += (_, _) => Layout(face, note);
 
-        foreach (var shape in new Shape[] { _track, _ring, _hole })
+        foreach (var shape in new Shape[] { _track, _hole })
             shape.SetBinding(Shape.StrokeProperty, new System.Windows.Data.Binding("Foreground") { RelativeSource = new(System.Windows.Data.RelativeSourceMode.FindAncestor, typeof(Window), 1) });
-        _thumb.SetBinding(Shape.FillProperty, new System.Windows.Data.Binding("Foreground") { RelativeSource = new(System.Windows.Data.RelativeSourceMode.FindAncestor, typeof(Window), 1) });
+        _ring.SetResourceReference(Shape.StrokeProperty, "ProgressBrush"); // Palette.Progress, set on the window
+        _thumb.SetResourceReference(Shape.FillProperty, "ProgressBrush");
 
         _clock = new DoubleAnimation(0, 360, TimeSpan.FromSeconds(6)) { RepeatBehavior = RepeatBehavior.Forever }.CreateClock();
         _rotate.ApplyAnimationClock(RotateTransform.AngleProperty, _clock);

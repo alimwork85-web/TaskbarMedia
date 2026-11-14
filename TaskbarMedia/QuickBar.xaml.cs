@@ -37,6 +37,7 @@ public partial class QuickBar : Window
         Root.RenderTransform = new TransformGroup { Children = { _enterScale, _enterSlide } };
         _background.Color = _palette.Background;
         Foreground = _palette.Foreground;
+        Resources["ProgressBrush"] = _palette.Progress;
         DiscCover.Hole = _background;
         _progressTimer.Tick += (_, _) => UpdateProgress();
 

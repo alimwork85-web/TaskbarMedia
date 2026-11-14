@@ -66,9 +66,9 @@
                     <Border Height="4" CornerRadius="2" VerticalAlignment="Center" Opacity="0.25"
                             Background="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Window}}"/>
                     <Border x:Name="SeekFill" Height="4" Width="0" CornerRadius="2" HorizontalAlignment="Left" VerticalAlignment="Center"
-                            Background="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                            Background="{DynamicResource ProgressBrush}"/>
                     <Ellipse x:Name="SeekThumb" Width="12" Height="12" HorizontalAlignment="Left" VerticalAlignment="Center"
-                             Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                             Fill="{DynamicResource ProgressBrush}"/>
                 </Grid>
                 <Grid x:Name="TimesRow" Opacity="0.7" Margin="0,2,0,0">
                     <TextBlock x:Name="ElapsedText" FontSize="11" Text="0:00" HorizontalAlignment="Left"/>

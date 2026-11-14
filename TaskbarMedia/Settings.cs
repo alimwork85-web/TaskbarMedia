@@ -45,7 +45,7 @@ internal static class Settings
             if (d == null) return;
             HideOnFullscreen = d.HideOnFullscreen;
             HotkeyEnabled = d.HotkeyEnabled;
-            AccentMode = d.AccentMode == "Windows" ? "Windows" : "Album";
+            AccentMode = d.AccentMode is "Windows" or "Black" ? d.AccentMode : "Album";
             PanelOpen = d.PanelOpen == "Hover" ? "Hover" : "Click";
             PanelShape = d.PanelShape == "Capsule" ? "Capsule" : "Normal";
             Style = d.Style == "Ribbon" ? "Ribbon" : "Disc";

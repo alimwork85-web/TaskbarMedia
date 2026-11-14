@@ -71,6 +71,13 @@ internal static class ColorExtractor
         return FromHsv(h, Math.Min(s, 0.65), Math.Clamp(v, 0.18, 0.38));
     }
 
+    /// <summary>Lifts a color so it reads as an accent on near-black.</summary>
+    public static Color ToAccentOnBlack(Color c)
+    {
+        ToHsv(c.R, c.G, c.B, out double h, out double s, out double v);
+        return FromHsv(h, Math.Min(s, 0.6), Math.Max(v, 0.9));
+    }
+
     /// <summary>Black or white, whichever reads better on <paramref name="background"/>.</summary>
     public static Color TextOn(Color background)
     {

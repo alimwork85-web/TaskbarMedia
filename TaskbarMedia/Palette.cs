@@ -9,12 +9,18 @@ namespace TaskbarMedia;
 /// Colors for the quick bar and the large panel: taken from the song's cover when it has a clear
 /// color, otherwise the normal light/dark theme colors.
 /// </summary>
-internal sealed record Palette(Color Background, Brush Foreground, Brush Active, Brush Inactive)
+internal sealed record Palette(Color Background, Brush Foreground, Brush Active, Brush Inactive, Brush? Ring = null)
 {
     private const byte Alpha = 0xFF; // opaque: anything lower lets the text behind show through
 
     public static Palette For(Color? coverColor)
     {
+        if (coverColor is { A: 0 } accent) // "Black" mode (Theme.PopupSource)
+        {
+            var active = Frozen(ColorExtractor.ToAccentOnBlack(accent with { A = 0xFF }));
+            return new Palette(Color.FromRgb(0x0B, 0x0B, 0x0B), Frozen(Colors.White), active,
+                Frozen(Color.FromArgb(0x99, 0xFF, 0xFF, 0xFF)), active);
+        }
         if (coverColor is { } cover)
         {
             var bg = ColorExtractor.ToBackground(cover);
@@ -35,6 +41,9 @@ internal sealed record Palette(Color Background, Brush Foreground, Brush Active,
             Frozen(text));
     }
 
+    /// <summary>The progress ring, its dot and the progress line: the text color, or Active in "Black" mode.</summary>
+    public Brush Progress => Ring ?? Foreground;
+
     /// <summary>The root's hairline edge: the text color, faint.</summary>
     public Brush Edge
     {
@@ -51,6 +60,7 @@ internal sealed record Palette(Color Background, Brush Foreground, Brush Active,
         background.BeginAnimation(SolidColorBrush.ColorProperty,
             new ColorAnimation(Background, TimeSpan.FromMilliseconds(400)) { EasingFunction = new QuadraticEase() });
         window.Foreground = Foreground;
+        window.Resources["ProgressBrush"] = Progress;
         root.BorderBrush = Edge;
     }
 
