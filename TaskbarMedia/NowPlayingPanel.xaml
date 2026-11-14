@@ -1,4 +1,4 @@
-<Window x:Class="TaskbarMedia.NowPlayingPanel"
+﻿<Window x:Class="TaskbarMedia.NowPlayingPanel"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:TaskbarMedia"
@@ -15,7 +15,7 @@
         </Border.Effect>
 
         <!-- Wide layout: cover on the leading side (right in RTL, left in LTR), controls in a column beside it. -->
-        <Grid>
+        <Grid x:Name="Inner">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="20"/>

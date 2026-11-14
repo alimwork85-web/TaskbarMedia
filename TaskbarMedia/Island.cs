@@ -121,7 +121,7 @@ internal sealed class Island : IDisposable
         if (_hasSession && wanted && !_fullscreen && !_panel.IsShown)
             _bar.ShowAt(Anchor(), IsTop);
         else
-            _bar.HideBar();
+            _bar.HideBar(instant: _fullscreen); // a full-screen app gets the screen at once
     }
 
     private static bool IsTop => Settings.Position.StartsWith("Top");
@@ -145,7 +145,7 @@ internal sealed class Island : IDisposable
         _hoverTimer.Stop();
         if (_panel.IsShown || !Native.GetWindowRect(_hwnd, out var bar)) return;
         _panel.ShowAt(bar, IsTop, new System.Windows.Size(_bar.Root.ActualWidth, _bar.Root.ActualHeight));
-        _bar.FadeOut();
+        _bar.HideBar();
     }
 
     private void Toggle()

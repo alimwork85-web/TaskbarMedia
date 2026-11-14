@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -96,33 +96,70 @@ public partial class NowPlayingPanel : Window
         _from = from;
         _scale.CenterX = Root.ActualWidth / 2;
         _scale.CenterY = top ? 0 : Root.ActualHeight;
-        Morph(1, 1, 1, MorphOpen, null);
+        Morph(1, 1, 1, null);
     }
 
-    private static readonly Duration MorphOpen = TimeSpan.FromMilliseconds(320);
-    private static readonly Duration MorphClose = TimeSpan.FromMilliseconds(220);
     private readonly ScaleTransform _scale = new();
     private Size _from;
     private bool _closing;
 
-    /// <summary>Animates the panel's scale (from wherever it is now) and opacity together.</summary>
-    private void Morph(double sx, double sy, double opacity, Duration duration, EventHandler? done)
+    /// <summary>
+    /// Opening (<paramref name="sx"/> &gt;= 1): the surface shows at once and grows out of the capsule
+    /// (280ms, EaseMorph) while the content fades in behind it, so it is never seen squashed.
+    /// Closing: the content fades first (80ms), then the surface shrinks back (180ms, EaseOut).
+    /// With reduced motion only the fades run.
+    /// </summary>
+    private void Morph(double sx, double sy, double opacity, EventHandler? done)
     {
-        var ease = new CubicEase { EasingMode = sx >= 1 ? EasingMode.EaseOut : EasingMode.EaseIn };
-        if (sx >= 1 && Opacity == 0)
+        bool opening = sx >= 1;
+        bool reduced = Motion.Reduced;
+        double nowX = _scale.ScaleX, nowY = _scale.ScaleY; // the animated values, before the animations are cleared
+        _scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+        _scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+        if (opening && Opacity == 0)
         {
-            // Opening from closed: jump to the capsule's size first.
-            _scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
-            _scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-            _scale.ScaleX = Ratio(_from.Width, Root.ActualWidth);
-            _scale.ScaleY = Ratio(_from.Height, Root.ActualHeight);
+            // Opening from closed: start at the capsule's size.
+            _scale.ScaleX = reduced ? 1 : Ratio(_from.Width, Root.ActualWidth);
+            _scale.ScaleY = reduced ? 1 : Ratio(_from.Height, Root.ActualHeight);
         }
-        var x = new DoubleAnimation(sx, duration) { EasingFunction = ease };
+        else
+        {
+            // Reopened while closing (or the reverse): carry on from where the scale is now.
+            _scale.ScaleX = nowX;
+            _scale.ScaleY = nowY;
+        }
+
+        var spline = opening ? Motion.EaseMorph : Motion.EaseOut;
+        double ms = opening ? 280 : 180, delay = opening ? 0 : 60;
+        DoubleAnimationUsingKeyFrames Shape(double to)
+        {
+            var a = Motion.To(to, ms, spline);
+            a.BeginTime = TimeSpan.FromMilliseconds(delay);
+            return a;
+        }
+
+        var x = Shape(reduced ? 1 : sx);
         if (done != null) x.Completed += done;
         _scale.BeginAnimation(ScaleTransform.ScaleXProperty, x);
-        _scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(sy, duration) { EasingFunction = ease });
-        // The content fades a little faster than it moves, so it never looks squashed for long.
-        BeginAnimation(OpacityProperty, new DoubleAnimation(opacity, new Duration(duration.TimeSpan * 0.6)));
+        _scale.BeginAnimation(ScaleTransform.ScaleYProperty, Shape(reduced ? 1 : sy));
+
+        if (opening)
+        {
+            BeginAnimation(OpacityProperty, Motion.To(opacity, 60, Motion.EaseOut));
+            var content = new DoubleAnimationUsingKeyFrames();
+            double start = Opacity == 0 ? 0 : Inner.Opacity; // reopening mid-close keeps what is visible
+            content.KeyFrames.Add(new DiscreteDoubleKeyFrame(start, KeyTime.FromTimeSpan(TimeSpan.Zero)));
+            content.KeyFrames.Add(new DiscreteDoubleKeyFrame(start, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(80))));
+            content.KeyFrames.Add(new SplineDoubleKeyFrame(1, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(240)), Motion.EaseOut));
+            Inner.BeginAnimation(OpacityProperty, content);
+        }
+        else
+        {
+            Inner.BeginAnimation(OpacityProperty, Motion.To(0, 80, Motion.EaseOut));
+            var fade = Motion.To(opacity, ms, Motion.EaseOut);
+            fade.BeginTime = TimeSpan.FromMilliseconds(delay);
+            BeginAnimation(OpacityProperty, fade);
+        }
     }
 
     /// <summary>"Disc": spinning record whose ring is the seek bar. "Ribbon": cover strip, the artist over a large Amiri title, a line seek bar.</summary>
@@ -173,7 +210,7 @@ public partial class NowPlayingPanel : Window
         EndDrag();
 
         // Shrink back into the island, then hide; the island fades back in when Hidden fires.
-        Morph(Ratio(_from.Width, Root.ActualWidth), Ratio(_from.Height, Root.ActualHeight), 0, MorphClose, (_, _) =>
+        Morph(Ratio(_from.Width, Root.ActualWidth), Ratio(_from.Height, Root.ActualHeight), 0, (_, _) =>
         {
             if (!_closing) return; // reopened while shrinking
             _closing = false;

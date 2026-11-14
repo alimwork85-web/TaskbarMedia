@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -34,6 +34,7 @@ public partial class QuickBar : Window
         bool light = Theme.IsLight();
         Root.BorderBrush = new SolidColorBrush(light ? Color.FromArgb(0x20, 0, 0, 0) : Color.FromArgb(0x20, 0xFF, 0xFF, 0xFF));
         Root.Background = _background;
+        Root.RenderTransform = new TransformGroup { Children = { _enterScale, _enterSlide } };
         _background.Color = _palette.Background;
         Foreground = _palette.Foreground;
         DiscCover.Hole = _background;
@@ -72,6 +73,7 @@ public partial class QuickBar : Window
             Opacity = 0;
             Show();
         }
+        bool appearing = !IsShown;
         if (!IsShown && Settings.Style == "Ribbon")
         {
             Root.CornerRadius = new CornerRadius(12);
@@ -93,34 +95,42 @@ public partial class QuickBar : Window
         TitleText.Running = ArtistText.Running = true;
         RefreshMotion();
 
-        if (Opacity < 1)
-            BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(120)));
+        if (!appearing) return; // the guard timer calls this every 500ms; animate only a real appearance
+        BeginAnimation(OpacityProperty, Motion.To(1, 160, Motion.EaseOut));
+        if (Motion.Reduced) return;
+        // Grow from 0.96 and slide 4px out of the edge it hangs from.
+        Root.RenderTransformOrigin = new Point(0.5, top ? 0 : 1);
+        _enterScale.BeginAnimation(ScaleTransform.ScaleXProperty, Motion.To(1, 160, Motion.EaseOut, 0.96));
+        _enterScale.BeginAnimation(ScaleTransform.ScaleYProperty, Motion.To(1, 160, Motion.EaseOut, 0.96));
+        _enterSlide.BeginAnimation(TranslateTransform.YProperty, Motion.To(0, 160, Motion.EaseOut, top ? -4 : 4));
     }
+
+    private readonly ScaleTransform _enterScale = new();
+    private readonly TranslateTransform _enterSlide = new();
 
     /// <summary>Whether the bar is currently on screen (WPF's IsVisible stays true once shown).</summary>
     public bool IsShown { get; private set; }
 
-    /// <summary>Hides the bar with a short fade (used while the large panel grows out of it).</summary>
-    public void FadeOut()
+    /// <summary>
+    /// Hides the bar with a short fade; <paramref name="instant"/> skips it (full-screen apps, style changes).
+    /// A ShowAt during the fade cancels the hide.
+    /// </summary>
+    public void HideBar(bool instant = false)
     {
         if (!IsShown) return;
         IsShown = false;
         TitleText.Running = ArtistText.Running = false;
         RefreshMotion();
-        var fade = new DoubleAnimation(0, TimeSpan.FromMilliseconds(160));
+        if (instant)
+        {
+            BeginAnimation(OpacityProperty, null);
+            Opacity = 0;
+            Native.ShowWindow(_hwnd, Native.SW_HIDE);
+            return;
+        }
+        var fade = Motion.To(0, 120, Motion.EaseOut);
         fade.Completed += (_, _) => { if (!IsShown) Native.ShowWindow(_hwnd, Native.SW_HIDE); };
         BeginAnimation(OpacityProperty, fade);
-    }
-
-    public void HideBar()
-    {
-        if (!IsShown) return;
-        IsShown = false;
-        TitleText.Running = ArtistText.Running = false;
-        RefreshMotion();
-        BeginAnimation(OpacityProperty, null);
-        Opacity = 0;
-        Native.ShowWindow(_hwnd, Native.SW_HIDE);
     }
 
     private MediaState? _lastState;
@@ -139,7 +149,7 @@ public partial class QuickBar : Window
         SquareCover.Visibility = ProgressLine.Visibility = disc ? Visibility.Collapsed : Visibility.Visible;
         ArtistText.Visibility = disc ? Visibility.Visible : Visibility.Collapsed;
         if (_lastState != null) Apply(_lastState);
-        HideBar(); // shape and size are worked out again on the next show
+        HideBar(instant: true); // shape and size are worked out again on the next show
     }
 
     /// <summary>Spinning and the progress timer run only while the bar is on screen and something plays.</summary>
