@@ -274,6 +274,18 @@ public partial class NowPlayingPanel : Window
     internal void RefreshAccent()
     {
         if (_lastState != null && Theme.PopupSource(_lastState.CoverColor) != _paletteSource) Apply(_lastState);
+        if (_lastState != null) UpdateGlass(_lastState.Cover);
+    }
+
+    private ImageSource? _glassFor; // the cover the glass background was made from; null = no glass
+
+    /// <summary>"Glass" mode: the blurred cover behind the panel, made once per cover.</summary>
+    private void UpdateGlass(ImageSource? cover)
+    {
+        var want = Settings.AccentMode == "Glass" ? cover : null;
+        if (ReferenceEquals(want, _glassFor)) return;
+        _glassFor = want;
+        Root.Background = Palette.Surface(_background, want != null ? Palette.Blurred(want) : null);
     }
 
     private string? _sourceApp;
@@ -294,6 +306,7 @@ public partial class NowPlayingPanel : Window
         ArtistText.FadeTo(state.Artist);
         Motion.CrossFade(CoverBrush, OldCoverBrush, OldCover, state.Cover);
         DiscCover.Cover = state.Cover;
+        UpdateGlass(state.Cover);
         _ = ShowSourceAsync(state.SourceApp);
         _playing = state.IsPlaying;
         RefreshSpin();

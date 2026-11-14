@@ -208,7 +208,7 @@ internal sealed class Island : IDisposable
         _menu.Items.Add(Choice("شكل اللوحة الكبيرة", Settings.PanelShape, v => Settings.PanelShape = v,
             ("Capsule", "كبسولة"), ("Normal", "عادي")));
         _menu.Items.Add(Choice("الألوان", Settings.AccentMode, v => { Settings.AccentMode = v; _bar.RefreshAccent(); _panel.RefreshAccent(); },
-            ("Album", "من غلاف الأغنية"), ("Windows", "لون ويندوز"), ("Black", "أسود")));
+            ("Album", "من غلاف الأغنية"), ("Windows", "لون ويندوز"), ("Black", "أسود"), ("Glass", "زجاج")));
         _menu.Items.Add(Toggle("إخفاء في وضع ملء الشاشة", Settings.HideOnFullscreen, v => Settings.HideOnFullscreen = v));
         _menu.Items.Add(Toggle("اختصار Ctrl+Alt+M", Settings.HotkeyEnabled, v => { Settings.HotkeyEnabled = v; ApplyHotkey(); }));
         _menu.Items.Add(new WinForms.ToolStripSeparator());

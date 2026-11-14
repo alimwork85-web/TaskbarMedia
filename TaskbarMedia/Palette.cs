@@ -65,17 +65,41 @@ internal sealed record Palette(Color Background, Brush Foreground, Brush Active,
     }
 
     /// <summary>
-    /// The root's background: <paramref name="background"/> (kept separate because the record's hole shows it too)
+    /// "Glass": <paramref name="glass"/> (a pre-blurred cover, see <see cref="Blurred"/>) fills the root,
+    /// under <paramref name="background"/> at 70%, under the sheen.
+    /// Otherwise the root's background: <paramref name="background"/> (kept separate because the record's hole shows it too)
     /// with a faint white sheen on top, 4% at the top edge fading to nothing at the bottom.
     /// </summary>
-    public static Brush Surface(SolidColorBrush background)
+    public static Brush Surface(SolidColorBrush background, ImageSource? glass = null)
     {
         var area = new RectangleGeometry(new Rect(0, 0, 1, 1));
         var sheen = new LinearGradientBrush(Color.FromArgb(0x0A, 0xFF, 0xFF, 0xFF), Color.FromArgb(0, 0xFF, 0xFF, 0xFF), 90);
         var drawing = new DrawingGroup();
-        drawing.Children.Add(new GeometryDrawing(background, null, area));
+        if (glass != null)
+            drawing.Children.Add(new GeometryDrawing(new ImageBrush(glass) { Stretch = Stretch.UniformToFill }, null, area));
+        drawing.Children.Add(new DrawingGroup { Opacity = glass != null ? 0.7 : 1, Children = { new GeometryDrawing(background, null, area) } });
         drawing.Children.Add(new GeometryDrawing(sheen, null, area));
         return new DrawingBrush(drawing) { Stretch = Stretch.Fill };
+    }
+
+    /// <summary>
+    /// The cover blurred once into a 48px bitmap (radius 16 on an 80px copy, edges cropped), so the glass
+    /// background is a plain image: no live blur on the layered window.
+    /// </summary>
+    public static ImageSource Blurred(ImageSource cover)
+    {
+        var image = new Image
+        {
+            Source = cover, Width = 80, Height = 80, Stretch = Stretch.UniformToFill,
+            Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 16 },
+        };
+        var host = new Grid { Width = 48, Height = 48, ClipToBounds = true, Children = { image } };
+        host.Measure(new Size(48, 48));
+        host.Arrange(new Rect(0, 0, 48, 48));
+        var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap(48, 48, 96, 96, PixelFormats.Pbgra32);
+        bitmap.Render(host);
+        bitmap.Freeze();
+        return bitmap;
     }
 
     private static SolidColorBrush Frozen(Color c)
