@@ -309,7 +309,7 @@ public partial class NowPlayingPanel : Window
         double fraction = _duration > TimeSpan.Zero ? Math.Clamp(position / _duration, 0, 1) : 0;
         double width = SeekBar.ActualWidth;
         SeekFill.Width = width * fraction;
-        DiscCover.Progress = fraction;
+        Motion.Glide(DiscCover, Disc.ProgressProperty, fraction, _dragging ? 0 : _seekTimer.Interval.TotalMilliseconds, 1);
         SeekThumb.Margin = new Thickness(Math.Clamp(width * fraction - SeekThumb.Width / 2, 0, Math.Max(0, width - SeekThumb.Width)), 0, 0, 0);
         ElapsedText.Text = FormatTime(position);
     }
@@ -335,11 +335,7 @@ public partial class NowPlayingPanel : Window
         if (sender == DiscCover)
         {
             // Only the ring seeks; a click on the cover itself does nothing.
-            var p = e.GetPosition(DiscCover);
-            double c = DiscCover.ActualWidth / 2;
-            // The transparent background makes the whole square clickable; keep it to a band around the ring.
-            double d = Math.Sqrt((p.X - c) * (p.X - c) + (p.Y - c) * (p.Y - c));
-            if (d < c - DiscCover.RingThickness - DiscCover.RingGap - 6 || d > c + 6) return;
+            if (!OnRing(e)) return;
         }
         _dragging = true;
         ((UIElement)sender).CaptureMouse();
@@ -347,10 +343,22 @@ public partial class NowPlayingPanel : Window
         e.Handled = true;
     }
 
+    /// <summary>The transparent background makes the record's whole square clickable; this keeps it to a band around the ring.</summary>
+    private bool OnRing(MouseEventArgs e)
+    {
+        var p = e.GetPosition(DiscCover);
+        double c = DiscCover.ActualWidth / 2;
+        double d = Math.Sqrt((p.X - c) * (p.X - c) + (p.Y - c) * (p.Y - c));
+        return d >= c - DiscCover.RingThickness - DiscCover.RingGap - 6 && d <= c + 6;
+    }
+
     private void Seek_MouseMove(object sender, MouseEventArgs e)
     {
         if (_dragging) DrawSeek(PositionAt(e));
+        if (sender == DiscCover) DiscCover.ShowThumb = _dragging || (_canSeek && OnRing(e));
     }
+
+    private void Disc_MouseLeave(object sender, MouseEventArgs e) => DiscCover.ShowThumb = _dragging;
 
     private async void Seek_MouseUp(object sender, MouseButtonEventArgs e)
     {
@@ -366,6 +374,7 @@ public partial class NowPlayingPanel : Window
     private void EndDrag()
     {
         _dragging = false;
+        DiscCover.ShowThumb = false;
         if (SeekBar.IsMouseCaptured) SeekBar.ReleaseMouseCapture();
         if (DiscCover.IsMouseCaptured) DiscCover.ReleaseMouseCapture();
     }

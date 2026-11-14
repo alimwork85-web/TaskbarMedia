@@ -105,6 +105,25 @@ public static class Motion
         brush.ImageSource = next;
     }
 
+    /// <summary>
+    /// Moves a progress value to <paramref name="to"/> in a straight line over <paramref name="ms"/> (the
+    /// refresh interval), so it creeps instead of ticking. Jumps instead for big moves (over 3% of
+    /// <paramref name="full"/>), any move back (a seek or a new song), or <paramref name="ms"/> = 0.
+    /// </summary>
+    public static void Glide(IAnimatable target, DependencyProperty property, double to, double ms, double full)
+    {
+        var element = (DependencyObject)target;
+        double now = (double)element.GetValue(property);
+        if (Math.Abs(to - now) < full * 0.0005) return;
+        if (ms <= 0 || to < now || to - now > full * 0.03)
+        {
+            target.BeginAnimation(property, null);
+            element.SetValue(property, to);
+            return;
+        }
+        target.BeginAnimation(property, new DoubleAnimation(to, TimeSpan.FromMilliseconds(ms)));
+    }
+
     private static KeySpline Frozen(KeySpline k)
     {
         k.Freeze();

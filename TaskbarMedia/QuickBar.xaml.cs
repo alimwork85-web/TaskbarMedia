@@ -165,8 +165,11 @@ public partial class QuickBar : Window
     {
         var t = _media.GetTimeline();
         double fraction = t is { } v ? v.Position / v.Duration : 0;
-        DiscCover.Progress = fraction;
-        ProgressFill.Width = ProgressLine.ActualWidth * Math.Clamp(fraction, 0, 1);
+        fraction = Math.Clamp(double.IsFinite(fraction) ? fraction : 0, 0, 1);
+        double ms = _progressTimer.Interval.TotalMilliseconds;
+        Motion.Glide(DiscCover, Disc.ProgressProperty, fraction, ms, 1);
+        double width = ProgressLine.ActualWidth;
+        if (width > 0) Motion.Glide(ProgressFill, WidthProperty, width * fraction, ms, width);
     }
 
     private void Apply(MediaState state)
