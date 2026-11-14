@@ -22,7 +22,9 @@
 
             <StackPanel Orientation="Horizontal">
                 <!-- Cover: a spinning record ("Disc" style) or a small square ("Ribbon" style) -->
-                <Grid x:Name="CoverGrid" VerticalAlignment="Center" Cursor="Hand" ToolTip="عرض التفاصيل">
+                <!-- The tip goes under the whole capsule (above it when there is no room), never over its edge -->
+                <Grid x:Name="CoverGrid" VerticalAlignment="Center" Cursor="Hand" ToolTip="عرض التفاصيل"
+                      ToolTipService.Placement="Bottom" ToolTipService.PlacementTarget="{Binding ElementName=Root}" ToolTipService.VerticalOffset="6">
                     <local:Disc x:Name="DiscCover" Width="40" Height="40" RingThickness="2.5"/>
                     <Grid x:Name="SquareCover" Width="28" Height="28">
                         <Border CornerRadius="6" Background="#33808080">

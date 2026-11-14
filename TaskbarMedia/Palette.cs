@@ -11,7 +11,7 @@ namespace TaskbarMedia;
 /// </summary>
 internal sealed record Palette(Color Background, Brush Foreground, Brush Active, Brush Inactive)
 {
-    private const byte Alpha = 0xF5;
+    private const byte Alpha = 0xFF; // opaque: anything lower lets the text behind show through
 
     public static Palette For(Color? coverColor)
     {
