@@ -44,6 +44,20 @@ internal sealed class Island : IDisposable
         _tray.MouseClick += (_, e) => { if (e.Button == WinForms.MouseButtons.Left) Toggle(); };
         // Rebuild before the menu measures itself; rebuilding inside Opening left the island's menu laid out for the old items.
         _menu.Opened += (_, _) => MenuStyle.Round(_menu.Handle);
+        _menu.Closed += (_, e) =>
+        {
+            if (!_panel.HoldOpen) return; // the tray's menu, or the panel wasn't open
+            _panel.HoldOpen = false;
+            if (!_panel.IsShown) return;
+            // A click in another app closes the panel too, as it would have without the menu; otherwise focus goes
+            // back to the panel so a later click elsewhere still closes it.
+            if (e.CloseReason == WinForms.ToolStripDropDownCloseReason.AppFocusChange) _panel.ClosePanel();
+            else
+            {
+                _panel.Activate();
+                if (Settings.PanelOpen == "Hover" && !_panel.IsMouseOver) _leaveTimer.Start();
+            }
+        };
         _tray.MouseDown += (_, e) => { if (e.Button == WinForms.MouseButtons.Right) BuildMenu(); };
 
         _bar.CoverClicked += OpenPanel;
@@ -64,7 +78,7 @@ internal sealed class Island : IDisposable
         // Opened by hovering: close again once the pointer has left it for a moment.
         _panel.MouseEnter += (_, _) => _leaveTimer.Stop();
         _panel.MouseLeave += (_, _) => { if (Settings.PanelOpen == "Hover") _leaveTimer.Start(); };
-        _leaveTimer.Tick += (_, _) => { _leaveTimer.Stop(); _panel.ClosePanel(); };
+        _leaveTimer.Tick += (_, _) => { _leaveTimer.Stop(); if (!_panel.HoldOpen) _panel.ClosePanel(); }; // not under its menu
         _panel.Hidden += Update;
 
         _peekTimer.Tick += (_, _) =>
@@ -188,6 +202,7 @@ internal sealed class Island : IDisposable
     private void ShowMenu()
     {
         BuildMenu();
+        _panel.HoldOpen = _panel.IsShown;
         _menu.Show(WinForms.Cursor.Position);
         // The island never takes focus, so without this the menu would not close on Esc or a click elsewhere.
         Native.SetForegroundWindow(_menu.Handle);

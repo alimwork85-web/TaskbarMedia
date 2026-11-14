@@ -55,7 +55,7 @@ public partial class NowPlayingPanel : Window
         _seekTimer.Tick += (_, _) => UpdateSeekBar();
         Root.RenderTransform = _scale;
 
-        Deactivated += (_, _) => ClosePanel();
+        Deactivated += (_, _) => { if (!HoldOpen) ClosePanel(); };
         KeyDown += (_, e) => { if (e.Key == Key.Escape) ClosePanel(); };
     }
 
@@ -242,6 +242,9 @@ public partial class NowPlayingPanel : Window
 
     /// <summary>Whether the panel is currently on screen (WPF's IsVisible stays true once shown).</summary>
     public bool IsShown { get; private set; }
+
+    /// <summary>The island's settings menu is open over the panel: losing focus to it must not close the panel.</summary>
+    internal bool HoldOpen { get; set; }
 
     /// <summary>Raised when the panel closes, so the island can come back.</summary>
     public event Action? Hidden;
