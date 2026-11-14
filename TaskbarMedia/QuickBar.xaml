@@ -9,9 +9,9 @@
         UseLayoutRounding="True">
 
     <!-- Outer margin leaves room for the shadow. -->
-    <Border x:Name="Root" Margin="12" CornerRadius="8" Padding="8,6" BorderThickness="1">
+    <Border x:Name="Root" Margin="16" CornerRadius="8" Padding="8,6" BorderThickness="1">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.35"/>
+            <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.28" Direction="270"/>
         </Border.Effect>
 
         <Grid x:Name="Body">

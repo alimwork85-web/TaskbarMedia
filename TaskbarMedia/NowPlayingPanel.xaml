@@ -9,9 +9,9 @@
         UseLayoutRounding="True">
 
     <!-- Outer margin leaves room for the shadow. -->
-    <Border x:Name="Root" Margin="12" CornerRadius="10" Padding="20" BorderThickness="1" Width="460">
+    <Border x:Name="Root" Margin="16" CornerRadius="10" Padding="20" BorderThickness="1" Width="460">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="20" ShadowDepth="3" Opacity="0.4"/>
+            <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.28" Direction="270"/>
         </Border.Effect>
 
         <!-- Wide layout: cover on the leading side (right in RTL, left in LTR), controls in a column beside it. -->

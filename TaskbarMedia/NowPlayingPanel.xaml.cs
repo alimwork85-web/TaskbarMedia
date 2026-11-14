@@ -42,9 +42,8 @@ public partial class NowPlayingPanel : Window
         _onUpdated = state => Dispatcher.InvokeAsync(() => Apply(state));
         _media.Updated += _onUpdated;
 
-        bool light = Theme.IsLight();
-        Root.BorderBrush = new SolidColorBrush(light ? Color.FromArgb(0x20, 0, 0, 0) : Color.FromArgb(0x20, 0xFF, 0xFF, 0xFF));
-        Root.Background = _background;
+        Root.BorderBrush = _palette.Edge;
+        Root.Background = Palette.Surface(_background);
         _background.Color = _palette.Background;
         Foreground = _palette.Foreground;
         DiscCover.Hole = _background;
@@ -250,7 +249,7 @@ public partial class NowPlayingPanel : Window
         {
             _paletteSource = source;
             _palette = Palette.For(source);
-            _palette.ApplyTo(this, _background);
+            _palette.ApplyTo(this, Root, _background);
         }
 
         Motion.SwapGlyph(PlayPauseButton, state.IsPlaying ? "\uF8AE" : "\uF5B0");

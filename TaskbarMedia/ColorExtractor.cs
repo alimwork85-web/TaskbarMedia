@@ -1,4 +1,4 @@
-using System.Windows.Media;
+﻿using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace TaskbarMedia;
@@ -68,7 +68,7 @@ internal static class ColorExtractor
     public static Color ToBackground(Color c)
     {
         ToHsv(c.R, c.G, c.B, out double h, out double s, out double v);
-        return FromHsv(h, Math.Min(s, 0.65), Math.Clamp(v, 0.28, 0.50));
+        return FromHsv(h, Math.Min(s, 0.65), Math.Clamp(v, 0.18, 0.38));
     }
 
     /// <summary>Black or white, whichever reads better on <paramref name="background"/>.</summary>

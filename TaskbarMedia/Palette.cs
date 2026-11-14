@@ -35,12 +35,37 @@ internal sealed record Palette(Color Background, Brush Foreground, Brush Active,
             Frozen(text));
     }
 
+    /// <summary>The root's hairline edge: the text color, faint.</summary>
+    public Brush Edge
+    {
+        get
+        {
+            var c = ((SolidColorBrush)Foreground).Color;
+            return Frozen(Color.FromArgb(0x1F, c.R, c.G, c.B));
+        }
+    }
+
     /// <summary>Applies the palette to a window whose root border uses <paramref name="background"/>, fading the color.</summary>
-    public void ApplyTo(Window window, SolidColorBrush background)
+    public void ApplyTo(Window window, Border root, SolidColorBrush background)
     {
         background.BeginAnimation(SolidColorBrush.ColorProperty,
             new ColorAnimation(Background, TimeSpan.FromMilliseconds(400)) { EasingFunction = new QuadraticEase() });
         window.Foreground = Foreground;
+        root.BorderBrush = Edge;
+    }
+
+    /// <summary>
+    /// The root's background: <paramref name="background"/> (kept separate because the record's hole shows it too)
+    /// with a faint white sheen on top, 4% at the top edge fading to nothing at the bottom.
+    /// </summary>
+    public static Brush Surface(SolidColorBrush background)
+    {
+        var area = new RectangleGeometry(new Rect(0, 0, 1, 1));
+        var sheen = new LinearGradientBrush(Color.FromArgb(0x0A, 0xFF, 0xFF, 0xFF), Color.FromArgb(0, 0xFF, 0xFF, 0xFF), 90);
+        var drawing = new DrawingGroup();
+        drawing.Children.Add(new GeometryDrawing(background, null, area));
+        drawing.Children.Add(new GeometryDrawing(sheen, null, area));
+        return new DrawingBrush(drawing) { Stretch = Stretch.Fill };
     }
 
     private static SolidColorBrush Frozen(Color c)
