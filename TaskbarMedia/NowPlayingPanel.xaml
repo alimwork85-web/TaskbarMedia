@@ -46,6 +46,16 @@
                 </Border>
             </Grid>
 
+            <!-- The playing app's icon on the cover's corner, ringed in the background color (placed in ApplyStyle) -->
+            <Border x:Name="SourceBadge" Grid.Column="0" Width="22" Height="22" CornerRadius="11" Padding="2"
+                    Visibility="Collapsed" IsHitTestVisible="False">
+                <Ellipse>
+                    <Ellipse.Fill>
+                        <ImageBrush x:Name="SourceBrush" Stretch="UniformToFill"/>
+                    </Ellipse.Fill>
+                </Ellipse>
+            </Border>
+
             <StackPanel Grid.Column="2" VerticalAlignment="Center">
             <!-- Title and artist swap rows by style: the "Ribbon" title sits under the artist, large, in Amiri -->
             <Grid>

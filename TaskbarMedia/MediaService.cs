@@ -21,7 +21,8 @@ public sealed record MediaState(
     bool IsShuffle,
     bool CanRepeat,
     MediaPlaybackAutoRepeatMode Repeat,
-    System.Windows.Media.Color? CoverColor)
+    System.Windows.Media.Color? CoverColor,
+    string SourceApp = "") // the playing app's AppUserModelId
 {
     public static readonly MediaState Empty =
         new(false, "", "", null, false, false, false, false, false, false, false, MediaPlaybackAutoRepeatMode.None, null);
@@ -140,7 +141,8 @@ public sealed class MediaService
                     info.IsShuffleActive ?? false,
                     c.IsRepeatEnabled,
                     info.AutoRepeatMode ?? MediaPlaybackAutoRepeatMode.None,
-                    coverColor);
+                    coverColor,
+                    session.SourceAppUserModelId ?? "");
             }
             catch (Exception)
             {
@@ -154,6 +156,52 @@ public sealed class MediaService
             Current = state;
             Updated?.Invoke(state);
         }
+    }
+
+    private static readonly Dictionary<string, System.Windows.Media.ImageSource?> AppIcons = new();
+
+    /// <summary>
+    /// The playing app's icon, cached per AUMID; null when it can't be found. Store apps ("Family!App") give
+    /// their logo; for desktop apps the AUMID is usually the exe's name, so the icon comes from the running process.
+    /// </summary>
+    public static async Task<System.Windows.Media.ImageSource?> AppIconAsync(string aumid)
+    {
+        if (aumid.Length == 0) return null;
+        if (AppIcons.TryGetValue(aumid, out var cached)) return cached;
+        System.Windows.Media.ImageSource? icon = null;
+        try
+        {
+            if (aumid.Contains('!'))
+            {
+                var info = Windows.ApplicationModel.AppInfo.GetFromAppUserModelId(aumid);
+                icon = await LoadImageAsync(info.DisplayInfo.GetLogo(new Size(64, 64)));
+            }
+            else
+            {
+                string? exe = null;
+                foreach (var p in System.Diagnostics.Process.GetProcessesByName(Path.GetFileNameWithoutExtension(aumid)))
+                {
+                    try { exe ??= p.MainModule?.FileName; } catch (Exception) { } // elevated or exiting
+                    p.Dispose();
+                }
+                if (exe != null && System.Drawing.Icon.ExtractAssociatedIcon(exe) is { } ico)
+                {
+                    using (ico)
+                    {
+                        var bmp = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
+                            ico.Handle, System.Windows.Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                        bmp.Freeze();
+                        icon = bmp;
+                    }
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // No badge then.
+        }
+        AppIcons[aumid] = icon;
+        return icon;
     }
 
     private static async Task<BitmapImage?> LoadImageAsync(IRandomAccessStreamReference reference)

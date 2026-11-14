@@ -48,6 +48,7 @@ public partial class NowPlayingPanel : Window
         Foreground = _palette.Foreground;
         Resources["ProgressBrush"] = _palette.Progress;
         DiscCover.Hole = _background;
+        SourceBadge.Background = _background;
 
         Apply(_media.Current);
 
@@ -180,6 +181,10 @@ public partial class NowPlayingPanel : Window
         TimesRow.Visibility = disc ? Visibility.Collapsed : Visibility.Visible;
         TimeText.Visibility = disc ? Visibility.Visible : Visibility.Collapsed;
         PlacePlayButton(disc);
+        // Badge: on the record's edge at 45 degrees (centered, shifted 48 = 66 radius * 0.71), or the strip's corner.
+        SourceBadge.HorizontalAlignment = disc ? HorizontalAlignment.Center : HorizontalAlignment.Right;
+        SourceBadge.VerticalAlignment = disc ? VerticalAlignment.Center : VerticalAlignment.Bottom;
+        SourceBadge.Margin = disc ? new Thickness(96, 96, 0, 0) : new Thickness(0, 0, -5, -5);
         // The large Ribbon title would otherwise widen the panel past the screen; capped, it scrolls instead.
         Root.MaxWidth = disc ? double.PositiveInfinity : 760;
     }
@@ -271,12 +276,25 @@ public partial class NowPlayingPanel : Window
         if (_lastState != null && Theme.PopupSource(_lastState.CoverColor) != _paletteSource) Apply(_lastState);
     }
 
+    private string? _sourceApp;
+
+    private async Task ShowSourceAsync(string app)
+    {
+        if (app == _sourceApp) return;
+        _sourceApp = app;
+        var icon = await MediaService.AppIconAsync(app);
+        if (app != _sourceApp) return; // the song moved on meanwhile
+        SourceBrush.ImageSource = icon;
+        SourceBadge.Visibility = icon != null ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     private void Apply(MediaState state)
     {
         TitleText.FadeTo(state.Title);
         ArtistText.FadeTo(state.Artist);
         Motion.CrossFade(CoverBrush, OldCoverBrush, OldCover, state.Cover);
         DiscCover.Cover = state.Cover;
+        _ = ShowSourceAsync(state.SourceApp);
         _playing = state.IsPlaying;
         RefreshSpin();
 
