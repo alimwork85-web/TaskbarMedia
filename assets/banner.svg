@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" width="1280" height="320" role="img" aria-label="TaskbarMedia: floating media island for Windows 11">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#EC4878"/>
+      <stop offset="1" stop-color="#961C5C"/>
+    </linearGradient>
+    <linearGradient id="disc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFC4D8"/>
+      <stop offset="1" stop-color="#F57AA6"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="320" rx="28" fill="url(#bg)"/>
+  <!-- the app's mark: a record with a hole and a 70% progress ring -->
+  <g transform="translate(200 160)">
+    <circle r="96" fill="none" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="16"/>
+    <path d="M 0 -96 A 96 96 0 1 1 -91.3 29.7" fill="none" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round"/>
+    <circle r="68" fill="url(#disc)"/>
+    <circle r="54" fill="none" stroke="#000000" stroke-opacity="0.08" stroke-width="1.5"/>
+    <circle r="40" fill="none" stroke="#000000" stroke-opacity="0.08" stroke-width="1.5"/>
+    <circle r="15" fill="#B4235F"/>
+  </g>
+  <text x="360" y="150" fill="#FFFFFF" font-family="Segoe UI Variable Display, Segoe UI, Helvetica, Arial, sans-serif" font-size="76" font-weight="700">TaskbarMedia</text>
+  <text x="362" y="206" fill="#FFFFFF" fill-opacity="0.9" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="30">Floating media island for Windows 11</text>
+  <text x="362" y="252" fill="#FFFFFF" fill-opacity="0.8" font-family="Segoe UI, Tahoma, Arial, sans-serif" font-size="28">جزيرة وسائط عائمة لويندوز 11</text>
+</svg>

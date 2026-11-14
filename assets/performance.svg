@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 270" width="760" height="270" role="img" aria-label="CPU use of TaskbarMedia 1.4.0, share of the whole processor: idle capsule with a song playing 1.0%, large panel open 1.1%, large panel open in Glass mode 1.1%">
+  <title>CPU use of TaskbarMedia 1.4.0 (% of the whole processor)</title>
+  <rect width="760" height="270" rx="12" fill="#FFFFFF"/>
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif">
+    <text x="24" y="38" font-size="18" font-weight="600" fill="#1F1F1F">CPU use, % of the whole processor (lower is better)</text>
+    <text x="24" y="60" font-size="13" fill="#5C5C5C">TaskbarMedia 1.4.0, song playing, 15 s averages, 2 runs each, 16 logical cores</text>
+    <!-- scale: 0..2% over 440px, bars start at x=260 -->
+    <g stroke="#E5E5E5" stroke-width="1">
+      <line x1="260" y1="82" x2="260" y2="222"/>
+      <line x1="480" y1="82" x2="480" y2="222"/>
+      <line x1="700" y1="82" x2="700" y2="222"/>
+    </g>
+    <g font-size="12" fill="#767676" text-anchor="middle">
+      <text x="260" y="242">0%</text>
+      <text x="480" y="242">1%</text>
+      <text x="700" y="242">2%</text>
+    </g>
+    <g font-size="14" fill="#1F1F1F" text-anchor="end">
+      <text x="248" y="111">Capsule showing (idle)</text>
+      <text x="248" y="157">Large panel open</text>
+      <text x="248" y="203">Large panel open, Glass</text>
+    </g>
+    <g fill="#B4235F">
+      <path d="M260 96 h216 a4 4 0 0 1 4 4 v12 a4 4 0 0 1 -4 4 h-216 z"/>
+      <path d="M260 142 h238 a4 4 0 0 1 4 4 v12 a4 4 0 0 1 -4 4 h-238 z"/>
+      <path d="M260 188 h238 a4 4 0 0 1 4 4 v12 a4 4 0 0 1 -4 4 h-238 z"/>
+    </g>
+    <g font-size="14" font-weight="600" fill="#1F1F1F">
+      <text x="494" y="111">1.0%</text>
+      <text x="513" y="157">1.1%</text>
+      <text x="513" y="203">1.1%</text>
+    </g>
+  </g>
+</svg>

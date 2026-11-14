@@ -1,4 +1,18 @@
+<p align="center"><img src="assets/banner.svg" alt="TaskbarMedia: floating media island for Windows 11" width="100%"></p>
+
+<p align="center">
+  <a href="https://github.com/alimwork85-web/TaskbarMedia/releases/latest"><img src="https://img.shields.io/github/v/release/alimwork85-web/TaskbarMedia?color=B4235F&label=release" alt="Latest release"></a>
+  <a href="https://github.com/alimwork85-web/TaskbarMedia/releases"><img src="https://img.shields.io/github/downloads/alimwork85-web/TaskbarMedia/total?color=B4235F" alt="Downloads"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/alimwork85-web/TaskbarMedia?color=555" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?logo=windows11&logoColor=white" alt="Windows 10 | 11">
+  <img src="https://img.shields.io/badge/.NET-8-512BD4?logo=dotnet&logoColor=white" alt=".NET 8">
+  <img src="https://img.shields.io/badge/UI-WPF-5C2D91" alt="WPF">
+  <img src="https://img.shields.io/badge/Arabic-RTL-0F7B5F" alt="Arabic RTL">
+</p>
+
 # TaskbarMedia
+
+<p align="center"><img src="assets/screenshots/demo.gif" alt="The capsule opens into the large panel on hover, then the song changes" width="720"></p>
 
 **Version 1.4.0** · Developer: **Ali Alhumedi** · © 2026 Ali Alhumedi
 
@@ -10,11 +24,30 @@
 
 ## English
 
-A small personal tool for Windows 11: a **floating media island** that lives on its own, independent of the taskbar. A small capsule with the song's cover and playback buttons sits at the top of the screen (or wherever you choose), opens into a large panel on hover or click, and keeps its icon in the system tray. It works with any source that plays audio or video and reports itself to Windows (YouTube in the browser, YouTube Music, Spotify, media players...).
+A small tool for Windows 11: a **floating media island** that lives on its own, independent of the taskbar. A small capsule with the song's cover and playback buttons sits at the top of the screen (or wherever you choose), opens into a large panel on hover or click, and keeps its icon in the system tray. It works with any source that plays audio or video and reports itself to Windows (YouTube in the browser, YouTube Music, Spotify, media players...).
 
 The idea comes from the "Taskbar Widget" feature in [FluentFlyout](https://github.com/unchihugo/FluentFlyout) (open source, GPL-3.0). We studied how it works and wrote our own simplified version with that feature only.
 
-> For personal use; the repository is private.
+**Download:** [TaskbarMedia.exe from the latest release](https://github.com/alimwork85-web/TaskbarMedia/releases/latest) (needs the [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)).
+
+### Screenshots
+
+| Disc | Ribbon |
+|---|---|
+| ![Large panel, Disc design](assets/screenshots/panel-disc.png) | ![Large panel, Ribbon design with an Arabic title](assets/screenshots/panel-ribbon.png) |
+| ![Capsule, Disc design](assets/screenshots/capsule-disc.png) | ![Capsule, Ribbon design](assets/screenshots/capsule-ribbon.png) |
+
+| Black colors | Glass colors |
+|---|---|
+| ![Large panel in Black colors](assets/screenshots/panel-black.png) | ![Large panel in Glass colors](assets/screenshots/panel-glass.png) |
+
+A short video of the same demo: [demo.mp4](assets/screenshots/demo.mp4).
+
+### Performance
+
+<img src="assets/performance.svg" alt="CPU use, share of the whole processor: capsule showing 1.0%, large panel open 1.1%, Glass 1.1%" width="640">
+
+Measured on the author's machine (16 logical cores) with a song playing: 15-second averages, two runs each.
 
 ### What it does
 
@@ -52,7 +85,7 @@ From the **right-click menu on the tray icon or the island**. Applied immediatel
 
 ### Running
 
-1. Run `dist\TaskbarMedia.exe`.
+1. Download `TaskbarMedia.exe` from [Releases](https://github.com/alimwork85-web/TaskbarMedia/releases/latest) and run it (or build it, below, and run `dist\TaskbarMedia.exe`).
 2. Needs the **.NET 8 Desktop Runtime** (already there if the .NET 8 SDK is installed).
 3. On first run it adds itself to startup, so it starts with every Windows sign-in.
 
@@ -142,11 +175,28 @@ The EXE is about 25 MB because it carries the Windows media library (`Windows.Me
 
 ## العربية
 
-أداة شخصية صغيرة لـ Windows 11: **جزيرة وسائط عائمة** مستقلة عن شريط المهام. كبسولة صغيرة بغلاف الأغنية وأزرار التشغيل في أعلى الشاشة (أو الموضع الذي تختاره)، تنفتح إلى لوحة كبيرة بالتمرير أو الضغط، وتعيش أيقونتها في الـ system tray. تعمل مع أي مصدر يشغّل صوتًا أو فيديو ويعرّف نفسه لـ Windows (YouTube في المتصفح، YouTube Music، Spotify، مشغل الوسائط...).
+أداة صغيرة لـ Windows 11: **جزيرة وسائط عائمة** مستقلة عن شريط المهام. كبسولة صغيرة بغلاف الأغنية وأزرار التشغيل في أعلى الشاشة (أو الموضع الذي تختاره)، تنفتح إلى لوحة كبيرة بالتمرير أو الضغط، وتعيش أيقونتها في الـ system tray. تعمل مع أي مصدر يشغّل صوتًا أو فيديو ويعرّف نفسه لـ Windows (YouTube في المتصفح، YouTube Music، Spotify، مشغل الوسائط...).
 
 الفكرة مستوحاة من ميزة "Taskbar Widget" في [FluentFlyout](https://github.com/unchihugo/FluentFlyout) (مفتوح المصدر، GPL-3.0). درسنا طريقة عملها وكتبنا نسخة مبسطة خاصة بنا تحتوي هذه الميزة فقط.
 
-> للاستخدام الشخصي، والمستودع خاص.
+**التنزيل:** [TaskbarMedia.exe من آخر إصدار](https://github.com/alimwork85-web/TaskbarMedia/releases/latest) (يحتاج [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)).
+
+### صور
+
+| أسطوانة | شريط |
+|---|---|
+| ![اللوحة الكبيرة بتصميم أسطوانة](assets/screenshots/panel-disc.png) | ![اللوحة الكبيرة بتصميم شريط وعنوان عربي](assets/screenshots/panel-ribbon.png) |
+| ![الكبسولة بتصميم أسطوانة](assets/screenshots/capsule-disc.png) | ![الكبسولة بتصميم شريط](assets/screenshots/capsule-ribbon.png) |
+
+| ألوان "أسود" | ألوان "زجاج" |
+|---|---|
+| ![اللوحة الكبيرة بألوان أسود](assets/screenshots/panel-black.png) | ![اللوحة الكبيرة بألوان زجاج](assets/screenshots/panel-glass.png) |
+
+مقطع فيديو قصير: [demo.mp4](assets/screenshots/demo.mp4)، والصورة المتحركة في أعلى الصفحة.
+
+### الأداء
+
+استهلاك المعالج من المعالج كله والأغنية تعمل (متوسط 15 ثانية، مرتين لكل حالة، على جهاز بـ 16 نواة منطقية): الكبسولة ظاهرة 1.0%، اللوحة الكبيرة مفتوحة 1.1%، ووضع "زجاج" 1.1%. الرسم البياني في القسم الإنجليزي.
 
 ### ما الذي تفعله
 
@@ -184,7 +234,7 @@ The EXE is about 25 MB because it carries the Windows media library (`Windows.Me
 
 ### التشغيل
 
-1. شغّل `dist\TaskbarMedia.exe`.
+1. نزّل `TaskbarMedia.exe` من [Releases](https://github.com/alimwork85-web/TaskbarMedia/releases/latest) وشغّله (أو ابنه كما في الأسفل وشغّل `dist\TaskbarMedia.exe`).
 2. يحتاج **.NET 8 Desktop Runtime** (موجود مسبقًا إذا كان .NET 8 SDK مثبتًا).
 3. عند أول تشغيل تُضاف الأداة إلى بدء التشغيل، فتعمل تلقائيًا مع كل دخول إلى Windows.
 
@@ -281,3 +331,9 @@ dotnet publish TaskbarMedia/TaskbarMedia.csproj -c Release -r win-x64 --self-con
 - **التمدد السلس:** اللوحة الكبيرة تنمو من حجم الكبسولة إلى حجمها الكامل (320 ms) وتنكمش إليها عند الإغلاق (220 ms)، والكبسولة تتلاشى وتعود معها.
 
 </div>
+
+---
+
+**License:** MIT © 2026 Ali Alhumedi · الرخصة: MIT © 2026 Ali Alhumedi
+
+#Windows11 #MediaPlayer #NowPlaying #Taskbar #DynamicIsland #WPF #DotNet #CSharp #Spotify #YouTubeMusic #FluentDesign #OpenSource #Arabic #RTL #ويندوز #مشغل_وسائط #مفتوح_المصدر
