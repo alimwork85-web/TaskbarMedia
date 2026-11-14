@@ -21,6 +21,7 @@ public sealed class Disc : Grid
     private readonly Path _ring = new() { StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round };
     private readonly Ellipse _hole = new() { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
     private readonly Ellipse _thumb = new() { Opacity = 0, IsHitTestVisible = false, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Top };
+    private readonly Grid _vinyl = new() { IsHitTestVisible = false }; // grooves, rim and sheen over the cover
     private bool _spinning;
     private bool _thumbShown;
 
@@ -65,6 +66,7 @@ public sealed class Disc : Grid
         _oldCover.RenderTransform = _rotate;
         _oldCover.RenderTransformOrigin = new Point(0.5, 0.5);
         face.Children.Add(_oldCover);
+        face.Children.Add(_vinyl);
         face.Children.Add(_hole);
         face.Children.Add(_holeContent);
         Children.Add(_track);
@@ -94,7 +96,36 @@ public sealed class Disc : Grid
         _hole.StrokeThickness = 0;
         _thumb.Width = _thumb.Height = RingThickness * 2.5;
         note.FontSize = faceSize * 0.4;
+        BuildVinyl(faceSize);
         DrawRing();
+    }
+
+    /// <summary>
+    /// Vinyl details: 3 faint grooves (concentric, so they need not spin), a thin dark rim, and a still
+    /// diagonal sheen. Grooves only on a face of 60 or more; on the capsule's small disc they read as noise.
+    /// </summary>
+    private void BuildVinyl(double faceSize)
+    {
+        _vinyl.Children.Clear();
+        if (faceSize >= 60)
+            foreach (double share in new[] { 0.92, 0.78, 0.64 })
+                _vinyl.Children.Add(new Ellipse
+                {
+                    Stroke = Frozen(Color.FromArgb(0x18, 0, 0, 0)),
+                    StrokeThickness = 1,
+                    Margin = new Thickness(faceSize * (1 - share) / 2),
+                });
+        _vinyl.Children.Add(new Ellipse { Stroke = Frozen(Color.FromArgb(0x40, 0, 0, 0)), StrokeThickness = 1 });
+        var sheen = new LinearGradientBrush(Color.FromArgb(0x14, 0xFF, 0xFF, 0xFF), Color.FromArgb(0, 0xFF, 0xFF, 0xFF), new Point(0.15, 0.15), new Point(0.6, 0.6));
+        sheen.Freeze();
+        _vinyl.Children.Add(new Ellipse { Fill = sheen });
+    }
+
+    private static SolidColorBrush Frozen(Color c)
+    {
+        var b = new SolidColorBrush(c);
+        b.Freeze();
+        return b;
     }
 
     public ImageSource? Cover { set => Motion.CrossFade(_cover, _oldCoverBrush, _oldCover, value); }
