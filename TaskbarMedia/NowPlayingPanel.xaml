@@ -72,9 +72,9 @@
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
                 <Button x:Name="ShuffleButton" Style="{StaticResource IconButton}" Width="44" Height="44" Content="&#xE8B1;" Click="Shuffle_Click"/>
-                <Button x:Name="PrevButton" Style="{StaticResource IconButton}" Width="44" Height="44" FontSize="17" Content="&#xE892;" Click="Prev_Click"/>
-                <Button x:Name="PlayPauseButton" Style="{StaticResource IconButton}" Width="52" Height="52" FontSize="24" Content="&#xE768;" Click="PlayPause_Click"/>
-                <Button x:Name="NextButton" Style="{StaticResource IconButton}" Width="44" Height="44" FontSize="17" Content="&#xE893;" Click="Next_Click"/>
+                <Button x:Name="PrevButton" Style="{StaticResource IconButton}" Width="44" Height="44" FontSize="17" Content="&#xF8AC;" Click="Prev_Click"/>
+                <Button x:Name="PlayPauseButton" Style="{StaticResource IconButton}" Width="52" Height="52" FontSize="24" Content="&#xF5B0;" Click="PlayPause_Click"/>
+                <Button x:Name="NextButton" Style="{StaticResource IconButton}" Width="44" Height="44" FontSize="17" Content="&#xF8AD;" Click="Next_Click"/>
                 <Button x:Name="RepeatButton" Style="{StaticResource IconButton}" Width="44" Height="44" Content="&#xE8EE;" Click="Repeat_Click"/>
             </StackPanel>
             </StackPanel>

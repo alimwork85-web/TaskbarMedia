@@ -50,3 +50,47 @@ internal sealed record Palette(Color Background, Brush Foreground, Brush Active,
         return b;
     }
 }
+
+/// <summary>Shared motion curves and durations, so every animation in the app moves the same way.</summary>
+public static class Motion
+{
+    public static readonly KeySpline EaseOut = Frozen(new KeySpline(0.23, 1, 0.32, 1));
+    public static readonly KeySpline EaseMorph = Frozen(new KeySpline(0.32, 0.72, 0, 1));
+
+    /// <summary>Windows "Animation effects" is off: fades only, no scaling, sliding or spinning.</summary>
+    public static bool Reduced => !SystemParameters.ClientAreaAnimation;
+
+    /// <summary>A single-segment animation to <paramref name="to"/> along <paramref name="curve"/>.</summary>
+    public static DoubleAnimationUsingKeyFrames To(double to, double ms, KeySpline curve, double? from = null)
+    {
+        var a = new DoubleAnimationUsingKeyFrames();
+        if (from is { } f) a.KeyFrames.Add(new DiscreteDoubleKeyFrame(f, KeyTime.FromTimeSpan(TimeSpan.Zero)));
+        a.KeyFrames.Add(new SplineDoubleKeyFrame(to, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(ms)), curve));
+        return a;
+    }
+
+    /// <summary>
+    /// Sets an IconButton's glyph; when it actually changes, the new glyph fades in growing from 0.8
+    /// (the "Glyph" presenter in App.xaml's IconButton template).
+    /// </summary>
+    public static void SwapGlyph(ContentControl button, string glyph)
+    {
+        if (Equals(button.Content, glyph)) return;
+        button.Content = glyph;
+        if (button.Template?.FindName("Glyph", button) is not UIElement g) return;
+
+        g.BeginAnimation(UIElement.OpacityProperty, To(1, 140, EaseOut, 0));
+        if (Reduced) return;
+        if (g.RenderTransform is not ScaleTransform s || s.IsFrozen)
+            g.RenderTransform = s = new ScaleTransform();
+        g.RenderTransformOrigin = new Point(0.5, 0.5);
+        s.BeginAnimation(ScaleTransform.ScaleXProperty, To(1, 140, EaseOut, 0.8));
+        s.BeginAnimation(ScaleTransform.ScaleYProperty, To(1, 140, EaseOut, 0.8));
+    }
+
+    private static KeySpline Frozen(KeySpline k)
+    {
+        k.Freeze();
+        return k;
+    }
+}

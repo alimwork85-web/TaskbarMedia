@@ -216,7 +216,7 @@ public partial class NowPlayingPanel : Window
             _palette.ApplyTo(this, _background);
         }
 
-        PlayPauseButton.Content = state.IsPlaying ? "\uE769" : "\uE768";
+        Motion.SwapGlyph(PlayPauseButton, state.IsPlaying ? "\uF8AE" : "\uF5B0");
         PrevButton.IsEnabled = state.CanPrevious;
         PlayPauseButton.IsEnabled = state.CanPlayPause;
         NextButton.IsEnabled = state.CanNext;

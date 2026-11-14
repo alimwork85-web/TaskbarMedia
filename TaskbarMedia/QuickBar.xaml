@@ -42,9 +42,9 @@
                     <local:MarqueeText x:Name="ArtistText" TextElement.FontSize="12" Opacity="0.7"/>
                 </StackPanel>
 
-                <Button x:Name="PrevButton" Style="{StaticResource IconButton}" Content="&#xE892;" Click="Prev_Click"/>
-                <Button x:Name="PlayPauseButton" Style="{StaticResource IconButton}" Content="&#xE768;" FontSize="17" Click="PlayPause_Click"/>
-                <Button x:Name="NextButton" Style="{StaticResource IconButton}" Content="&#xE893;" Click="Next_Click"/>
+                <Button x:Name="PrevButton" Style="{StaticResource IconButton}" Content="&#xF8AC;" Click="Prev_Click"/>
+                <Button x:Name="PlayPauseButton" Style="{StaticResource IconButton}" Content="&#xF5B0;" FontSize="17" Click="PlayPause_Click"/>
+                <Button x:Name="NextButton" Style="{StaticResource IconButton}" Content="&#xF8AD;" Click="Next_Click"/>
             </StackPanel>
 
             <!-- "Ribbon" style: the bottom edge is the progress line -->
