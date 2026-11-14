@@ -176,8 +176,46 @@ public partial class NowPlayingPanel : Window
         else TitleText.SetValue(TextElement.FontFamilyProperty, Amiri);
         TitleText.SetValue(TextElement.FontSizeProperty, disc ? 17.0 : 30.0);
         TitleText.SetValue(TextElement.FontWeightProperty, disc ? FontWeights.SemiBold : FontWeights.Normal);
+        TimesRow.Visibility = disc ? Visibility.Collapsed : Visibility.Visible;
+        TimeText.Visibility = disc ? Visibility.Visible : Visibility.Collapsed;
+        PlacePlayButton(disc);
         // The large Ribbon title would otherwise widen the panel past the screen; capped, it scrolls instead.
         Root.MaxWidth = disc ? double.PositiveInfinity : 760;
+    }
+
+    /// <summary>
+    /// "Disc": play/pause sits in the record's hole (44, round). "Ribbon": back in the middle of the row,
+    /// filled: a 48 circle in the text color with the glyph in the background color.
+    /// </summary>
+    private void PlacePlayButton(bool disc)
+    {
+        bool inHole = DiscCover.HoleContent == PlayPauseButton;
+        if (disc && !inHole)
+        {
+            ControlsRow.Children.Remove(PlayPauseButton);
+            DiscCover.HoleContent = PlayPauseButton;
+        }
+        else if (!disc && inHole)
+        {
+            DiscCover.HoleContent = null;
+            ControlsRow.Children.Insert(2, PlayPauseButton);
+        }
+        PlayPauseButton.Width = PlayPauseButton.Height = disc ? 44 : 48;
+        PlayPauseButton.FontSize = disc ? 20 : 22;
+        TintPlayButton();
+    }
+
+    private void TintPlayButton()
+    {
+        if (Settings.Style == "Disc")
+        {
+            PlayPauseButton.ClearValue(BackgroundProperty);
+            PlayPauseButton.ClearValue(ForegroundProperty);
+            return;
+        }
+        PlayPauseButton.Background = _palette.Foreground;
+        var bg = _palette.Background;
+        PlayPauseButton.Foreground = new SolidColorBrush(Color.FromRgb(bg.R, bg.G, bg.B));
     }
 
     /// <summary>The record spins only while the panel is open and something plays.</summary>
@@ -185,7 +223,7 @@ public partial class NowPlayingPanel : Window
 
     private static double Ratio(double part, double whole) => whole > 0 ? Math.Clamp(part / whole, 0.05, 1) : 1;
 
-    /// <summary>Normal: 10px corners. Capsule: fully rounded ends, with wider side padding so the cover and controls stay clear of the curve.</summary>
+    /// <summary>Normal: 18px corners. Capsule: fully rounded ends, with wider side padding so the cover and controls stay clear of the curve.</summary>
     private void ApplyShape()
     {
         bool capsule = Settings.PanelShape == "Capsule";
@@ -193,7 +231,7 @@ public partial class NowPlayingPanel : Window
         Root.Padding = new Thickness(side, 20, side, 20);
         Root.Width = double.NaN; // size to content, so the seek times and buttons are never cut off
         UpdateLayout();
-        Root.CornerRadius = new CornerRadius(capsule ? Root.ActualHeight / 2 : 10);
+        Root.CornerRadius = new CornerRadius(capsule ? Root.ActualHeight / 2 : 18);
     }
 
     /// <summary>Whether the panel is currently on screen (WPF's IsVisible stays true once shown).</summary>
@@ -250,6 +288,7 @@ public partial class NowPlayingPanel : Window
             _paletteSource = source;
             _palette = Palette.For(source);
             _palette.ApplyTo(this, Root, _background);
+            TintPlayButton();
         }
 
         Motion.SwapGlyph(PlayPauseButton, state.IsPlaying ? "\uF8AE" : "\uF5B0");
@@ -259,11 +298,17 @@ public partial class NowPlayingPanel : Window
 
         // Shuffle/repeat only work when the source app supports them.
         ShuffleButton.IsEnabled = state.CanShuffle;
-        ShuffleButton.Foreground = state.CanShuffle && state.IsShuffle ? _palette.Active : _palette.Inactive;
+        bool shuffleOn = state.CanShuffle && state.IsShuffle;
+        ShuffleButton.Foreground = shuffleOn ? _palette.Active : _palette.Inactive;
+        ShuffleDot.Fill = _palette.Active;
+        ShuffleDot.Visibility = shuffleOn ? Visibility.Visible : Visibility.Hidden;
 
         RepeatButton.IsEnabled = state.CanRepeat;
         RepeatButton.Content = state.Repeat == MediaPlaybackAutoRepeatMode.Track ? "\uE8ED" : "\uE8EE";
-        RepeatButton.Foreground = state.CanRepeat && state.Repeat != MediaPlaybackAutoRepeatMode.None ? _palette.Active : _palette.Inactive;
+        bool repeatOn = state.CanRepeat && state.Repeat != MediaPlaybackAutoRepeatMode.None;
+        RepeatButton.Foreground = repeatOn ? _palette.Active : _palette.Inactive;
+        RepeatDot.Fill = _palette.Active;
+        RepeatDot.Visibility = repeatOn ? Visibility.Visible : Visibility.Hidden;
 
         if (!state.HasSession) ClosePanel();
     }
@@ -311,6 +356,7 @@ public partial class NowPlayingPanel : Window
         Motion.Glide(DiscCover, Disc.ProgressProperty, fraction, _dragging ? 0 : _seekTimer.Interval.TotalMilliseconds, 1);
         SeekThumb.Margin = new Thickness(Math.Clamp(width * fraction - SeekThumb.Width / 2, 0, Math.Max(0, width - SeekThumb.Width)), 0, 0, 0);
         ElapsedText.Text = FormatTime(position);
+        TimeText.Text = FormatTime(position) + " / " + FormatTime(_duration);
     }
 
     private TimeSpan PositionAt(MouseEventArgs e)

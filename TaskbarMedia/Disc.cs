@@ -30,6 +30,18 @@ public sealed class Disc : Grid
     /// <summary>Gap between the ring and the cover.</summary>
     public double RingGap { get; set; } = 2;
 
+    /// <summary>Hole diameter as a share of the cover's.</summary>
+    public double HoleScale { get; set; } = 0.28;
+
+    private readonly ContentControl _holeContent = new() { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, Focusable = false };
+
+    /// <summary>An element shown on the hole (e.g. the play button); it stays still while the record spins.</summary>
+    public UIElement? HoleContent
+    {
+        get => _holeContent.Content as UIElement;
+        set => _holeContent.Content = value;
+    }
+
     public Disc()
     {
         FlowDirection = FlowDirection.LeftToRight; // the ring always runs clockwise
@@ -54,6 +66,7 @@ public sealed class Disc : Grid
         _oldCover.RenderTransformOrigin = new Point(0.5, 0.5);
         face.Children.Add(_oldCover);
         face.Children.Add(_hole);
+        face.Children.Add(_holeContent);
         Children.Add(_track);
         Children.Add(_ring);
         Children.Add(face);
@@ -76,7 +89,7 @@ public sealed class Disc : Grid
         _track.StrokeThickness = _ring.StrokeThickness = RingThickness;
         _track.Visibility = _ring.Visibility = RingThickness > 0 ? Visibility.Visible : Visibility.Collapsed;
         double faceSize = Width - 2 * inset;
-        _hole.Width = _hole.Height = faceSize * 0.28;
+        _hole.Width = _hole.Height = faceSize * HoleScale;
         _hole.StrokeThickness = 0;
         _thumb.Width = _thumb.Height = RingThickness * 2.5;
         note.FontSize = faceSize * 0.4;
