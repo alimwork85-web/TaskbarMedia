@@ -29,6 +29,8 @@
     <Using Remove="System.Windows.Forms" />
     <Using Remove="System.Drawing" />
     <Resource Include="app.ico" />
+    <Resource Include="tray-light.ico" />
+    <Resource Include="tray-dark.ico" />
     <Resource Include="Fonts\Amiri-Regular.ttf" />
     <Resource Include="Fonts\IBMPlexSansArabic-Regular.ttf" />
     <Resource Include="Fonts\IBMPlexSansArabic-SemiBold.ttf" />

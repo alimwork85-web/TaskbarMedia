@@ -17,6 +17,7 @@ internal sealed class Island : IDisposable
     private readonly NowPlayingPanel _panel;
     private readonly WinForms.NotifyIcon _tray;
     private readonly WinForms.ContextMenuStrip _menu = new() { RightToLeft = WinForms.RightToLeft.Yes };
+    private bool _trayLight; // taskbar theme the tray icon was picked for
     private readonly IntPtr _hwnd; // the capsule's window; also receives the hotkey
 
     private readonly DispatcherTimer _guardTimer = new() { Interval = TimeSpan.FromMilliseconds(500) };
@@ -39,7 +40,7 @@ internal sealed class Island : IDisposable
         _hwnd = new WindowInteropHelper(_bar).EnsureHandle();
         HwndSource.FromHwnd(_hwnd)?.AddHook(WndProc);
 
-        _tray = new WinForms.NotifyIcon { Icon = LoadIcon(), Text = "TaskbarMedia", ContextMenuStrip = _menu, Visible = true };
+        _tray = new WinForms.NotifyIcon { Icon = LoadIcon(_trayLight = Theme.IsLight()), Text = "TaskbarMedia", ContextMenuStrip = _menu, Visible = true };
         _tray.MouseClick += (_, e) => { if (e.Button == WinForms.MouseButtons.Left) Toggle(); };
         // Rebuild before the menu measures itself; rebuilding inside Opening left the island's menu laid out for the old items.
         _menu.Opened += (_, _) => MenuStyle.Round(_menu.Handle);
@@ -84,6 +85,12 @@ internal sealed class Island : IDisposable
             }
             _bar.RefreshAccent(); // picks up a changed Windows accent color
             _panel.RefreshAccent();
+            if (Theme.IsLight() != _trayLight)
+            {
+                var old = _tray.Icon;
+                _tray.Icon = LoadIcon(_trayLight = !_trayLight);
+                old?.Dispose();
+            }
             Update(); // also re-places it after display or DPI changes
         };
         _guardTimer.Start();
@@ -247,9 +254,11 @@ internal sealed class Island : IDisposable
         return IntPtr.Zero;
     }
 
-    private static System.Drawing.Icon LoadIcon()
+    // The glyph alone, light on a dark taskbar and dark on a light one.
+    private static System.Drawing.Icon LoadIcon(bool lightTaskbar)
     {
-        using var stream = System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/app.ico"))!.Stream;
+        var name = lightTaskbar ? "tray-dark.ico" : "tray-light.ico";
+        using var stream = System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/" + name))!.Stream;
         return new System.Drawing.Icon(stream, WinForms.SystemInformation.SmallIconSize);
     }
 
