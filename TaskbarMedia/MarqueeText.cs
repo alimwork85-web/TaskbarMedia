@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -91,9 +91,54 @@ public sealed class MarqueeText : Panel
         if (overflow != _overflow)
         {
             _overflow = overflow;
+            OpacityMask = overflow > 0 ? EdgeFade : null; // soft edges only when the text is cut
             Dispatcher.BeginInvoke(Restart, DispatcherPriority.Background);
         }
         return final;
+    }
+
+    private static readonly Brush EdgeFade = MakeEdgeFade();
+
+    private static Brush MakeEdgeFade()
+    {
+        var b = new LinearGradientBrush { StartPoint = new Point(0, 0), EndPoint = new Point(1, 0) };
+        b.GradientStops.Add(new GradientStop(Colors.Transparent, 0));
+        b.GradientStops.Add(new GradientStop(Colors.Black, 0.06));
+        b.GradientStops.Add(new GradientStop(Colors.Black, 0.94));
+        b.GradientStops.Add(new GradientStop(Colors.Transparent, 1));
+        b.Freeze();
+        return b;
+    }
+
+    private string? _pending;
+
+    /// <summary>
+    /// Changes the text with a short fade (out 90ms, swap, in 150ms); nothing happens when it is unchanged.
+    /// A change during the fade-out just updates what is swapped in.
+    /// </summary>
+    public void FadeTo(string text)
+    {
+        if (text == (_pending ?? Text)) return;
+        if (!IsVisible)
+        {
+            _pending = null;
+            BeginAnimation(OpacityProperty, null);
+            Text = text;
+            return;
+        }
+        bool fading = _pending != null;
+        _pending = text;
+        if (fading) return;
+        double rest = (double)GetAnimationBaseValue(OpacityProperty); // e.g. the artist line's 0.7
+        var fadeOut = Motion.To(0, 90, Motion.EaseOut);
+        fadeOut.Completed += (_, _) =>
+        {
+            if (_pending == null) return;
+            Text = _pending;
+            _pending = null;
+            BeginAnimation(OpacityProperty, Motion.To(rest, 150, Motion.EaseOut));
+        };
+        BeginAnimation(OpacityProperty, fadeOut);
     }
 
     private void Restart()

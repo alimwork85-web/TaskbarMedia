@@ -235,9 +235,9 @@ public partial class NowPlayingPanel : Window
 
     private void Apply(MediaState state)
     {
-        TitleText.Text = state.Title;
-        ArtistText.Text = state.Artist;
-        CoverBrush.ImageSource = state.Cover;
+        TitleText.FadeTo(state.Title);
+        ArtistText.FadeTo(state.Artist);
+        Motion.CrossFade(CoverBrush, OldCoverBrush, OldCover, state.Cover);
         DiscCover.Cover = state.Cover;
         _playing = state.IsPlaying;
         RefreshSpin();

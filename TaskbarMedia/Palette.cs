@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -86,6 +86,23 @@ public static class Motion
         g.RenderTransformOrigin = new Point(0.5, 0.5);
         s.BeginAnimation(ScaleTransform.ScaleXProperty, To(1, 140, EaseOut, 0.8));
         s.BeginAnimation(ScaleTransform.ScaleYProperty, To(1, 140, EaseOut, 0.8));
+    }
+
+    /// <summary>
+    /// Shows <paramref name="next"/> in <paramref name="brush"/>, fading the previous image out (200ms) on
+    /// <paramref name="oldLayer"/>, a layer painted with <paramref name="oldBrush"/> above it. Same image: nothing happens.
+    /// </summary>
+    public static void CrossFade(ImageBrush brush, ImageBrush oldBrush, UIElement oldLayer, ImageSource? next)
+    {
+        if (ReferenceEquals(brush.ImageSource, next)) return;
+        if (brush.ImageSource is { } previous)
+        {
+            oldBrush.ImageSource = previous;
+            var fade = To(0, 200, EaseOut, 1);
+            fade.Completed += (_, _) => { if (oldLayer.Opacity == 0) oldBrush.ImageSource = null; };
+            oldLayer.BeginAnimation(UIElement.OpacityProperty, fade);
+        }
+        brush.ImageSource = next;
     }
 
     private static KeySpline Frozen(KeySpline k)

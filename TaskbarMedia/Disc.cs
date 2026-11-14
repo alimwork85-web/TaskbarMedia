@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -13,6 +13,8 @@ namespace TaskbarMedia;
 public sealed class Disc : Grid
 {
     private readonly ImageBrush _cover = new() { Stretch = Stretch.UniformToFill };
+    private readonly ImageBrush _oldCoverBrush = new() { Stretch = Stretch.UniformToFill };
+    private readonly Ellipse _oldCover = new() { Opacity = 0, IsHitTestVisible = false };
     private readonly RotateTransform _rotate = new();
     private readonly AnimationClock _clock;
     private readonly Ellipse _track = new() { Opacity = 0.25 };
@@ -46,6 +48,10 @@ public sealed class Disc : Grid
         var face = new Grid();
         face.Children.Add(placeholder);
         face.Children.Add(cover);
+        _oldCover.Fill = _oldCoverBrush; // the previous song's cover, fading out over the new one
+        _oldCover.RenderTransform = _rotate;
+        _oldCover.RenderTransformOrigin = new Point(0.5, 0.5);
+        face.Children.Add(_oldCover);
         face.Children.Add(_hole);
         Children.Add(_track);
         Children.Add(_ring);
@@ -73,7 +79,7 @@ public sealed class Disc : Grid
         DrawRing();
     }
 
-    public ImageSource? Cover { set => _cover.ImageSource = value; }
+    public ImageSource? Cover { set => Motion.CrossFade(_cover, _oldCoverBrush, _oldCover, value); }
 
     /// <summary>The hole shows the window's background through the record.</summary>
     public Brush? Hole { set => _hole.Fill = value; }

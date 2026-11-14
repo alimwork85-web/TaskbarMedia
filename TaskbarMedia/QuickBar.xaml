@@ -1,4 +1,4 @@
-<Window x:Class="TaskbarMedia.QuickBar"
+﻿<Window x:Class="TaskbarMedia.QuickBar"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:TaskbarMedia"
@@ -32,6 +32,12 @@
                         <Border CornerRadius="6">
                             <Border.Background>
                                 <ImageBrush x:Name="CoverBrush" Stretch="UniformToFill"/>
+                            </Border.Background>
+                        </Border>
+                        <!-- The previous song's cover, fading out over the new one -->
+                        <Border x:Name="OldCover" CornerRadius="6" Opacity="0" IsHitTestVisible="False">
+                            <Border.Background>
+                                <ImageBrush x:Name="OldCoverBrush" Stretch="UniformToFill"/>
                             </Border.Background>
                         </Border>
                     </Grid>

@@ -172,9 +172,9 @@ public partial class QuickBar : Window
     private void Apply(MediaState state)
     {
         bool ribbon = Settings.Style == "Ribbon";
-        TitleText.Text = ribbon && state.Artist.Length > 0 && state.Title.Length > 0 ? state.Title + " — " + state.Artist : state.Title;
-        ArtistText.Text = state.Artist;
-        CoverBrush.ImageSource = state.Cover;
+        TitleText.FadeTo(ribbon && state.Artist.Length > 0 && state.Title.Length > 0 ? state.Title + " — " + state.Artist : state.Title);
+        ArtistText.FadeTo(state.Artist);
+        Motion.CrossFade(CoverBrush, OldCoverBrush, OldCover, state.Cover);
         DiscCover.Cover = state.Cover;
         Body.Opacity = state.IsPlaying ? 1 : 0.75;
 

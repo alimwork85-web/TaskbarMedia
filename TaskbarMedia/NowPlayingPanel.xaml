@@ -38,6 +38,12 @@
                         <ImageBrush x:Name="CoverBrush" Stretch="UniformToFill"/>
                     </Border.Background>
                 </Border>
+                <!-- The previous song's cover, fading out over the new one -->
+                <Border x:Name="OldCover" CornerRadius="8" Opacity="0" IsHitTestVisible="False">
+                    <Border.Background>
+                        <ImageBrush x:Name="OldCoverBrush" Stretch="UniformToFill"/>
+                    </Border.Background>
+                </Border>
             </Grid>
 
             <StackPanel Grid.Column="2" VerticalAlignment="Center">
