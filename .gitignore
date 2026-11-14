@@ -9,3 +9,8 @@ backup_*/
 # Editors
 .vs/
 *.user
+
+# Local work notes (kept on disk, not published)
+PLAN.md
+PLAN-VISUAL.md
+HANDOFF-VISUAL.md
