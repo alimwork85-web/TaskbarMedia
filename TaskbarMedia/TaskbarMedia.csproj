@@ -15,7 +15,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
 
     <!-- Shown in the EXE's Properties > Details. -->
-    <Version>1.1.0</Version>
+    <Version>1.4.0</Version>
     <Product>TaskbarMedia</Product>
     <AssemblyTitle>TaskbarMedia</AssemblyTitle>
     <Description>Floating media island for Windows 11</Description>

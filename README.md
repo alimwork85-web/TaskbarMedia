@@ -1,6 +1,6 @@
 # TaskbarMedia
 
-**Version 1.1.0** · Developer: **Ali Alhumedi** · © 2026 Ali Alhumedi
+**Version 1.4.0** · Developer: **Ali Alhumedi** · © 2026 Ali Alhumedi
 
 [English](#english) · [العربية](#العربية)
 
@@ -46,7 +46,7 @@ From the **right-click menu on the tray icon or the island**. Applied immediatel
 | Open the large panel | Click on the cover | Or "Hover over the bar": opens after resting on it a moment, closes when the mouse leaves |
 | Design | Disc | "Disc": the cover is a record that spins while playing, with a progress ring (in the large panel, click or drag around the ring to seek). "Ribbon": square cover with a progress line; the panel has a large title in Amiri |
 | Large panel shape | Normal | "Normal" with soft corners, or "Capsule" with fully rounded ends |
-| Colors | From the cover | Or "Windows color" |
+| Colors | From the cover | Or "Windows color", "Black" (near-black with the cover's color as the accent), or "Glass" (the blurred cover behind the large panel) |
 | Hide in fullscreen | On | Hides the island during fullscreen video or games |
 | Ctrl+Alt+M shortcut | On | Hides or shows the island, like clicking the tray icon |
 
@@ -98,7 +98,9 @@ The EXE is about 25 MB because it carries the Windows media library (`Windows.Me
 | `Theme.cs` | Reads light/dark theme and the Windows accent color |
 | `Autostart.cs` | Startup registration |
 | `Native.cs` | Win32 declarations |
-| `app.ico` | App and tray icon |
+| `app.ico` | App icon |
+| `tray-light.ico`, `tray-dark.ico` | Tray icon for a dark and a light taskbar |
+| `Fonts/IBMPlexSansArabic-*.ttf`, `Fonts/TaskbarMediaUI.CompositeFont` | UI font: Arabic from [IBM Plex Sans Arabic](https://github.com/IBM/plex), SIL OFL 1.1 (`Fonts/IBMPlexSansArabic-OFL.txt`), Latin from Segoe UI Variable |
 | `Fonts/Amiri-Regular.ttf` | Panel title font in the "Ribbon" design: [Amiri](https://github.com/aliftype/amiri), SIL OFL 1.1 (`Fonts/OFL.txt`) |
 | `app.manifest` | Per-monitor DPI (PerMonitorV2) and Windows 10/11 compatibility |
 
@@ -109,6 +111,15 @@ The EXE is about 25 MB because it carries the Windows media library (`Windows.Me
 - **Fullscreen** comes from `SHQueryUserNotificationState`: games (D3D) and presentation mode count directly; the "busy" state counts only when the window in front covers its whole screen, because transparent screen-sized overlays (screenshot tools and the like) also raise it.
 - **Tray icon** is a WinForms `NotifyIcon` and comes back by itself after Explorer restarts.
 - **A watch timer** every half second: fullscreen, Windows color, and re-placing the island after display changes.
+
+### What's new in 1.4.0
+
+- **Motion:** buttons respond to hover and press, the capsule fades in, the large panel grows out of it and shrinks back, titles and covers cross-fade on a new song, progress moves smoothly, and the record eases into and out of spinning. With Windows "Animation effects" off, only fades remain.
+- **Look:** calmer cover-based backgrounds that keep text readable, a fine edge and soft shadow, play/pause in the record's hole ("Disc") or a filled button ("Ribbon"), dots under active shuffle/repeat, vinyl grooves and sheen on the large record, and the playing app's icon on the cover's corner.
+- **New color modes:** "Black" and "Glass".
+- **Font:** IBM Plex Sans Arabic for Arabic and Segoe UI Variable for Latin.
+- **New icon:** a brighter pink app icon that stays visible on a dark taskbar, and a tray icon that follows the taskbar's light or dark theme.
+- **Fixes:** the tooltip sits under the capsule instead of over it; right-clicking the open panel no longer closes it.
 
 ### What's new in 1.1.0
 
@@ -167,7 +178,7 @@ The EXE is about 25 MB because it carries the Windows media library (`Windows.Me
 | فتح اللوحة الكبيرة | بالضغط على الغلاف | أو "بالتمرير فوق الشريط": تنفتح بالوقوف عليه لحظة وتنغلق بابتعاد الماوس عنها |
 | التصميم | أسطوانة | "أسطوانة": الغلاف قرص يدور أثناء التشغيل وحوله حلقة التقدم (في اللوحة الكبيرة انقر أو اسحب حول الحلقة للتقديم). "شريط": غلاف مربع وخط تقدم، واللوحة بعنوان كبير بخط Amiri |
 | شكل اللوحة الكبيرة | عادي | "عادي" بزوايا خفيفة أو "كبسولة" بأطراف دائرية كاملة |
-| الألوان | من غلاف الأغنية | أو "لون ويندوز" |
+| الألوان | من غلاف الأغنية | أو "لون ويندوز"، أو "أسود" (خلفية سوداء ولون الغلاف للحلقة والتقدم)، أو "زجاج" (الغلاف مموّهًا خلف اللوحة الكبيرة) |
 | إخفاء في وضع ملء الشاشة | مفعّل | تختفي الجزيرة أثناء الفيديو أو اللعبة بملء الشاشة |
 | اختصار Ctrl+Alt+M | مفعّل | يخفي الجزيرة أو يظهرها، مثل الضغط على أيقونة الـ tray |
 
@@ -219,7 +230,9 @@ dotnet publish TaskbarMedia/TaskbarMedia.csproj -c Release -r win-x64 --self-con
 | `Theme.cs` | قراءة الثيم الفاتح/الداكن ولون Windows المميز |
 | `Autostart.cs` | التسجيل في بدء التشغيل |
 | `Native.cs` | تعريفات Win32 المستخدمة |
-| `app.ico` | أيقونة التطبيق والـ tray |
+| `app.ico` | أيقونة التطبيق |
+| `tray-light.ico`، `tray-dark.ico` | أيقونة الـ tray لشريط مهام داكن وفاتح |
+| `Fonts/IBMPlexSansArabic-*.ttf`، `Fonts/TaskbarMediaUI.CompositeFont` | خط الواجهة: العربية من [IBM Plex Sans Arabic](https://github.com/IBM/plex)، رخصة SIL OFL 1.1 (`Fonts/IBMPlexSansArabic-OFL.txt`)، واللاتينية من Segoe UI Variable |
 | `Fonts/Amiri-Regular.ttf` | خط عنوان اللوحة في تصميم "شريط": [Amiri](https://github.com/aliftype/amiri)، رخصة SIL OFL 1.1 (`Fonts/OFL.txt`) |
 | `app.manifest` | دعم DPI لكل شاشة (PerMonitorV2) وتوافق Windows 10/11 |
 
@@ -230,6 +243,15 @@ dotnet publish TaskbarMedia/TaskbarMedia.csproj -c Release -r win-x64 --self-con
 - **ملء الشاشة** يُعرف من `SHQueryUserNotificationState`: الألعاب (D3D) ووضع العرض التقديمي يُحسبان مباشرة، أما حالة "مشغول" فلا تُحسب إلا إذا كانت النافذة الأمامية تغطي شاشتها كاملة، لأن الطبقات الشفافة بحجم الشاشة (أدوات التقاط الشاشة ونحوها) ترفعها أيضًا.
 - **أيقونة الـ tray** من `NotifyIcon` (WinForms)، وتعود وحدها بعد إعادة تشغيل Explorer.
 - **مؤقت متابعة** كل نصف ثانية: ملء الشاشة، ولون Windows، وإعادة وضع الجزيرة بعد تغيّر الشاشة.
+
+### الجديد في 1.4.0
+
+- **الحركة:** الأزرار تستجيب للتمرير والضغط، والكبسولة تظهر بتلاشٍ، واللوحة الكبيرة تنمو منها وتنكمش إليها، والعنوان والغلاف يتبدلان بتلاشٍ ناعم عند تغيّر الأغنية، والتقدم يزحف بنعومة، والأسطوانة تتسارع وتتباطأ. عند إيقاف "تأثيرات الحركة" في ويندوز يبقى التلاشي فقط.
+- **الشكل:** خلفيات من الغلاف أهدأ تُبقي النص واضحًا، وحافة رفيعة وظل ناعم، وزر التشغيل في ثقب الأسطوانة ("أسطوانة") أو زر ممتلئ ("شريط")، ونقطة تحت العشوائي والتكرار عند تفعيلهما، وأخاديد ولمعة على الأسطوانة الكبيرة، وأيقونة التطبيق المشغِّل على زاوية الغلاف.
+- **وضعا ألوان جديدان:** "أسود" و"زجاج".
+- **الخط:** IBM Plex Sans Arabic للعربية وSegoe UI Variable للاتينية.
+- **أيقونة جديدة:** وردية أفتح تظهر بوضوح على شريط المهام الداكن، وأيقونة tray تتبع ثيم الشريط الفاتح أو الداكن.
+- **إصلاحات:** التلميح صار تحت الكبسولة لا فوقها، والضغط بالزر الأيمن على اللوحة المفتوحة لم يعد يغلقها.
 
 ### الجديد في 1.1.0
 
