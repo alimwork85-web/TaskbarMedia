@@ -33,6 +33,7 @@ public partial class QuickBar : Window
 
         Root.BorderBrush = _palette.Edge;
         Root.Background = Palette.Surface(_background);
+        CoverGrid.Tag = _background; // the tooltip's background (ToolTip style in App.xaml)
         Root.RenderTransform = new TransformGroup { Children = { _enterScale, _enterSlide } };
         _background.Color = _palette.Background;
         Foreground = _palette.Foreground;

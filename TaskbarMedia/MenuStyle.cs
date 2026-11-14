@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using WinForms = System.Windows.Forms;
 
@@ -71,8 +71,11 @@ internal sealed class MenuStyle : WinForms.ToolStripProfessionalRenderer
 
     protected override void OnRenderArrow(WinForms.ToolStripArrowRenderEventArgs e)
     {
-        e.ArrowColor = Color.FromArgb(0xB0, _fg);
-        base.OnRenderArrow(e);
+        // Fluent chevron, like the check mark; the menu is right-to-left, so submenus usually open to the left.
+        using var font = new Font("Segoe Fluent Icons", 8f);
+        string glyph = e.Direction == WinForms.ArrowDirection.Left ? "\uE76B" : "\uE76C";
+        WinForms.TextRenderer.DrawText(e.Graphics, glyph, font, e.ArrowRectangle, Color.FromArgb(0xB0, _fg),
+            WinForms.TextFormatFlags.HorizontalCenter | WinForms.TextFormatFlags.VerticalCenter);
     }
 
     protected override void OnRenderSeparator(WinForms.ToolStripSeparatorRenderEventArgs e)

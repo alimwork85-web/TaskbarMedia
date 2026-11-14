@@ -6,6 +6,24 @@
     <Application.Resources>
         <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 
+        <!-- Tooltips in the island's colors: the text color is inherited by the element the tip belongs to,
+             the background is that element's Tag (QuickBar puts its background brush there). -->
+        <Style TargetType="ToolTip">
+            <Setter Property="Background" Value="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}"/>
+            <Setter Property="Foreground" Value="{Binding PlacementTarget.(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="HasDropShadow" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToolTip">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="8,5">
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="IconButton" TargetType="Button">
             <Setter Property="Width" Value="34"/>
             <Setter Property="Height" Value="34"/>
