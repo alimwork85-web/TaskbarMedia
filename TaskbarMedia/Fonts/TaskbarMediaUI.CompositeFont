@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The app's UI font: Arabic from the bundled IBM Plex Sans Arabic, everything else from Windows 11's
+     Segoe UI Variable (Segoe UI on Windows 10). Line metrics match Segoe UI so lines don't change height. -->
+<FontFamily xmlns="http://schemas.microsoft.com/winfx/2006/xaml/composite-font"
+            xmlns:System="clr-namespace:System;assembly=mscorlib"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            Baseline="1.0791015625" LineSpacing="1.330078125">
+    <FontFamily.FamilyNames>
+        <System:String x:Key="en-US">TaskbarMedia UI</System:String>
+    </FontFamily.FamilyNames>
+    <FontFamily.FamilyMaps>
+        <FontFamilyMap Unicode="0600-06FF, 0750-077F, 08A0-08FF, FB50-FDFF, FE70-FEFF" Target="./#IBM Plex Sans Arabic" Scale="1.0"/>
+        <FontFamilyMap Target="Segoe UI Variable Display, Segoe UI" Scale="1.0"/>
+    </FontFamily.FamilyMaps>
+</FontFamily>

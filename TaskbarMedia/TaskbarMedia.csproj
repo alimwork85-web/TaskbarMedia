@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -30,6 +30,9 @@
     <Using Remove="System.Drawing" />
     <Resource Include="app.ico" />
     <Resource Include="Fonts\Amiri-Regular.ttf" />
+    <Resource Include="Fonts\IBMPlexSansArabic-Regular.ttf" />
+    <Resource Include="Fonts\IBMPlexSansArabic-SemiBold.ttf" />
+    <Resource Include="Fonts\TaskbarMediaUI.CompositeFont" />
   </ItemGroup>
 
 </Project>

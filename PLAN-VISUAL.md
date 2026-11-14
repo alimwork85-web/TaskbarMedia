@@ -167,3 +167,13 @@ TaskbarMedia تطبيق WPF (.NET 8، `TaskbarMedia/TaskbarMedia.csproj`) مكت
 - ملاحظة للمالك (موجودة قبل الخطة، لم أغيّرها): التلميح يظهر تحت المؤشر فيتداخل مع أسفل الكبسولة، والكبسولة تُرفع `TOPMOST` كل 500ms فتغطي نصفه. حلّها تحديد موضع التلميح (`Placement="Bottom"` مع إزاحة تتجاوز حافة الكبسولة) أو `Top` للمواضع السفلية.
 - ملاحظة: الضغط على الكبسولة لا يغلق القائمة المفتوحة (الكبسولة لا تأخذ التركيز)؛ تُغلق بالضغط على أي نافذة أخرى. سلوك قديم.
 - النسخة الاحتياطية: `e18a585`. التراجع: `git reset --hard e18a585`
+
+### المرحلة 8
+- C1 + C2: خط الواجهة للنافذتين `UiFont` في `App.xaml` = `Fonts/TaskbarMediaUI.CompositeFont` (ملف خط مركّب جديد): نطاقات العربية (0600-06FF، 0750-077F، 08A0-08FF، FB50-FDFF، FE70-FEFF) من IBM Plex Sans Arabic المضمّن، والباقي من `Segoe UI Variable Display, Segoe UI`. مقاييس السطر = مقاييس Segoe UI (1.33/1.079) فلم يتغير ارتفاع السطر (قيس: 34.58 للخطين بحجم 26، وخط التقدم في الكبسولة في الموضع نفسه).
+  - لماذا ملف مركّب لا قائمة "A, B": جرّبت القائمة فعلًا؛ WPF يملأ العربية الناقصة في Segoe UI Variable من بدائل النظام ولا يصل إلى Plex أبدًا (لقطات WPF مقارنة).
+  - الخطوط: `IBMPlexSansArabic-Regular.ttf` و`-SemiBold.ttf` من `IBM/plex` (packages/plex-sans-arabic/fonts/complete/ttf)، وترخيصها `IBMPlexSansArabic-OFL.txt`، و`Resource` في csproj.
+  - على ويندوز 10 (بلا Segoe UI Variable) يرجع اللاتيني إلى Segoe UI، والعربية تبقى Plex.
+- C1 للقائمة: **لم يُعتمد**. بـ "Segoe UI Variable Text" يرسم GDI العربية بخط بديل أصغر وأخشن (لقطة مقارنة)، والقائمة عربية، فبقيت على Segoe UI.
+- C4: جُرّب `TextFormattingMode="Display"` على الكبسولة: النص أنحف ويفقد وزن SemiBold، وليس أوضح بفرق ملحوظ، والنص المتحرك يهتز مع التقريب إلى البكسل. **لم يُعتمد**.
+- C3: Amiri باقٍ لعنوان "الشريط" (تحقق باللقطة).
+- النسخة الاحتياطية: `d1ec6a7`. التراجع: `git reset --hard d1ec6a7`
